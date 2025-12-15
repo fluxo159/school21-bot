@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title>Бронирование комнат • Школа 21</title>
+		<meta name="ngrok-skip-browser-warning" content="69420" />
+		<script src="https://telegram.org/js/telegram-web-app.js"></script>
+		<link
+			rel="stylesheet"
+			href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+		/>
+		<link rel="stylesheet" href="style.css" />
+		<script src="translations.js"></script>
+	</head>
+	<body>
+		<!-- Экран выбора этажа -->
+		<div id="floors-screen" class="screen" style="display: none">
+			<div class="container">
+			<div class="card-header">
+				<!-- Кнопка переключения языка -->
+				<button class="language-btn" onclick="toggleLanguage()" data-i18n-title="changeLanguageTitle" title="Изменить язык">
+					<span id="lang-indicator">RU</span>
+				</button>
+				
+				<!-- Иконка пользователя в правом верхнем углу -->
+				<button class="user-profile-btn" onclick="showRegistrationScreen()" data-i18n-title="editProfile">
+					<i class="fas fa-user"></i>
+				</button>
+				
+				<h2 data-i18n="selectFloor">Выберите этаж</h2>
+				<div class="coins-display" id="user-coins-floor">🪙 100</div>
+				<p class="text-gray loading-dots" id="user-info-floor">Загрузка</p>
+				
+				<!-- Дед Мороз в правом нижнем углу card-header -->
+				<div class="santa-decoration">
+					<img src="assets/santa.png" alt="Santa Claus" />
+				</div>
+			</div>
+
+				<div class="space-y-4">
+					<div class="floor-card" onclick="selectFloor(2)">
+						<div class="floor-content">
+							<div>
+								<h3 data-i18n-floor="2">🏢 2 Этаж</h3>
+								<p class="floor-subtitle" data-i18n="floor2Description">3 скайпницы</p>
+								<p class="floor-details" data-i18n="floor2Details">
+									7 коинов/час • До 4 человек • Шумоизоляция
+								</p>
+							</div>
+							<div class="floor-icon">
+								<i class="fas fa-headset"></i>
+							</div>
+						</div>
+					</div>
+
+					<div class="floor-card" onclick="selectFloor(3)">
+						<div class="floor-content">
+							<div>
+								<h3 data-i18n-floor="3">🏢 3 Этаж</h3>
+								<p class="floor-subtitle" data-i18n="floor3Description">6 скайпниц + 3 переговорки</p>
+								<p class="floor-details" data-i18n="floor3Details">
+									Скайпницы: 7 коинов • Переговорки: 12 коинов
+								</p>
+							</div>
+							<div class="floor-icon">
+								<i class="fas fa-building"></i>
+							</div>
+						</div>
+					</div>
+
+					<button class="btn btn-secondary" onclick="navigateTo('bookings')">
+						<i class="fas fa-calendar-alt"></i>&nbsp; <span data-i18n="myBookings">Мои бронирования</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Главный экран с комнатами -->
+		<div id="main-screen" class="screen" style="display: none">
+			<div class="container">
+				<div class="card-header">
+				<h2 id="floor-title" data-i18n="floor2">🏢 2 Этаж</h2>
+				<p class="text-gray loading-dots" id="user-info" data-i18n="loading">Загрузка</p>
+				<div class="coins-display" id="user-coins">🪙 100</div>
+				<div class="back-btn" onclick="showFloorsScreen()">
+					<i class="fas fa-arrow-left"></i> <span data-i18n="back">Назад</span>
+				</div>
+			</div>
+
+			<div id="rooms-container">
+				<!-- Здесь появятся комнаты -->
+				<p class="text-center text-gray loading-dots" data-i18n="loadingRooms">Загрузка комнат</p>
+			</div>
+			</div>
+		</div>
+
+		<!-- Экран регистрации -->
+		<div id="registration-screen" class="screen" style="display: none">
+			<div class="container">
+				<div class="card-header">
+					<h2 data-i18n="welcome">👋 Добро пожаловать!</h2>
+					<p id="user-info-reg" class="text-gray loading-dots" data-i18n="loading">Загрузка</p>
+					<div class="coins-display">🪙 100</div>
+					<p class="text-gray mt-2" style="font-size: 14px;" data-i18n="receivedCoins">Вы получили 100 коинов за регистрацию!</p>
+				</div>
+
+				<div class="card">
+					<h3 class="mb-4" style="font-size: 22px; font-weight: 700;" data-i18n="completeRegistration">Завершите регистрацию</h3>
+					<p class="text-gray mb-4" data-i18n="registrationDescription">
+						Для бронирования комнат укажите ваш школьный логин и номер телефона
+					</p>
+
+					<div class="input-group">
+						<label for="school-login" class="input-label" data-i18n="schoolLogin">Школьный логин *</label>
+						<input
+							type="text"
+							id="school-login"
+							class="input-field"
+							placeholder="your_login"
+							required
+						/>
+					</div>
+
+					<div class="input-group">
+						<label for="phone" class="input-label" data-i18n="phoneNumber">Номер телефона *</label>
+						<input
+							type="tel"
+							id="phone"
+							class="input-field"
+							placeholder="+998-00-000-00-00"
+							required
+							pattern="\+998-[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
+						/>
+					</div>
+
+					<button class="btn btn-primary" onclick="registerUser()">
+						<i class="fas fa-check"></i>&nbsp; <span data-i18n="continue">Продолжить</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Мои бронирования -->
+		<div id="bookings-screen" class="screen" style="display: none">
+			<div class="container">
+				<div class="card-header">
+					<h2 data-i18n="myBookings">📋 Мои бронирования</h2>
+				</div>
+				
+				<div class="back-btn" onclick="showFloorsScreen()" style="margin-bottom: 20px;">
+					<i class="fas fa-arrow-left"></i> <span data-i18n="back">Назад</span>
+				</div>
+
+				<div id="bookings-container">
+					<!-- Здесь появятся бронирования -->
+					<p class="text-center text-gray loading-dots" data-i18n="loading">Загрузка</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Экран ошибки -->
+		<div id="error-screen" class="screen" style="display: none">
+			<div class="container">
+				<div class="card-header">
+					<h2 data-i18n="error">⚠️ Ошибка</h2>
+				</div>
+				<div class="card">
+					<p id="error-message" class="text-center mb-4" style="color: #ef4444;"></p>
+					<button class="btn btn-primary" onclick="location.reload()">
+						<i class="fas fa-sync"></i>&nbsp; <span data-i18n="reload">Перезагрузить</span>
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Нижняя навигация -->
+		<div class="nav-bar">
+			<button class="nav-btn" onclick="showFloorsScreen()">
+				<i class="fas fa-building"></i>
+				<span data-i18n="floors">Этажи</span>
+			</button>
+			<button class="nav-btn" onclick="navigateTo('bookings')">
+				<i class="fas fa-calendar-alt"></i>
+				<span data-i18n="bookings">Бронирования</span>
+			</button>
+		</div>
+
+		<script src="app.js"></script>
+		<script src="booking.js"></script>
+	</body>
+</html>

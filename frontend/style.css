@@ -1,0 +1,1127 @@
+/* ═══════════════════════════════════════════════════
+   iOS GLASSMORPHISM THEME - Room Booking System
+   Premium frosted glass interface with backdrop blur
+   ═══════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-blue: #3B82F6;
+  --primary-blue-light: #60A5FA;
+  --primary-blue-dark: #2563EB;
+  --dark-bg: #0f172a;
+  --dark-card: rgba(30, 41, 59, 0.7);
+  --dark-glass: rgba(51, 65, 85, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-light: #f1f5f9;
+  --text-gray: #94a3b8;
+  --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 12px 48px rgba(0, 0, 0, 0.5);
+  --shadow-large: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  color: var(--text-light);
+  min-height: 100vh;
+  padding: 20px;
+  padding-bottom: 100px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ═══════════════════════════════════════════════════
+   SNOW ANIMATION - Beautiful falling snow effect (DENSE)
+   ═══════════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 200%;
+  pointer-events: none;
+  z-index: 1;
+  background-image:
+    radial-gradient(3px 3px at 20px 30px, rgba(255,255,255,1), transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 90px 10px, rgba(255,255,255,0.95), transparent),
+    radial-gradient(3px 3px at 160px 120px, rgba(255,255,255,0.85), transparent),
+    radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(3px 3px at 70px 150px, rgba(255,255,255,0.95), transparent),
+    radial-gradient(2px 2px at 200px 60px, rgba(255,255,255,1), transparent),
+    radial-gradient(2px 2px at 50px 180px, rgba(255,255,255,0.85), transparent),
+    radial-gradient(3px 3px at 110px 100px, rgba(255,255,255,1), transparent),
+    radial-gradient(2px 2px at 180px 150px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 25px 140px, rgba(255,255,255,0.95), transparent),
+    radial-gradient(3px 3px at 140px 45px, rgba(255,255,255,0.9), transparent),
+    radial-gradient(2px 2px at 100px 190px, rgba(255,255,255,0.85), transparent);
+  background-repeat: repeat;
+  background-size: 250px 250px, 300px 300px, 200px 200px, 280px 280px, 260px 260px, 220px 220px, 240px 240px, 290px 290px, 270px 270px, 230px 230px, 210px 210px, 265px 265px, 245px 245px;
+  animation: snowfall 20s linear infinite;
+  opacity: 1;
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(50%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SANTA DECORATION - Christmas decoration in card-header
+   ═══════════════════════════════════════════════════ */
+.card-header {
+  position: relative;
+}
+
+.santa-decoration {
+  position: absolute;
+  bottom: 0;
+  right: 5%;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.9;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
+}
+
+.santa-decoration img {
+  width: 132px;
+  height: auto;
+  display: block;
+}
+
+/* На маленьких экранах уменьшим размер */
+@media (max-width: 480px) {
+  .santa-decoration img {
+    width: 99px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   CONTAINERS & LAYOUT
+   ═══════════════════════════════════════════════════ */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.screen {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   GLASS CARDS - Main glassmorphism effect (Dark, 40% transparency)
+   ═══════════════════════════════════════════════════ */
+.card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px;
+  padding: 24px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-medium);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.card-header {
+  background: rgba(51, 65, 85, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px;
+  padding: 24px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-soft);
+  position: relative;
+}
+
+.card-header h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--text-light);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+/* ═══════════════════════════════════════════════════
+   USER PROFILE BUTTON - Квадратная иконка пользователя
+   ═══════════════════════════════════════════════════ */
+.user-profile-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--primary-blue-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.user-profile-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+.user-profile-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+.user-profile-btn i {
+  font-size: 18px;
+}
+
+/* ═══════════════════════════════════════════════════
+   LANGUAGE BUTTON - Кнопка переключения языка
+   ═══════════════════════════════════════════════════ */
+.language-btn {
+  position: absolute;
+  top: 20px;
+  right: 74px; /* Справа от кнопки пользователя (44px + 20px + 10px отступа) */
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: var(--primary-blue-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.language-btn:hover {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+}
+
+.language-btn:active {
+  transform: translateY(0) scale(0.95);
+}
+
+#lang-indicator {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+/* ═══════════════════════════════════════════════════
+   BUTTONS - iOS style with scale feedback
+   ═══════════════════════════════════════════════════ */
+.btn {
+  display: block;
+  width: 100%;
+  padding: 16px 24px;
+  border-radius: 20px;
+  border: none;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: white;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 30px rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: rgba(51, 65, 85, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  color: var(--text-light);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-secondary:hover {
+  background: rgba(51, 65, 85, 0.6);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   NAVIGATION BAR - Glass bottom bar (40% transparency)
+   ═══════════════════════════════════════════════════ */
+.nav-bar {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(51, 65, 85, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  padding: 16px;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-large);
+  z-index: 1000;
+  max-width: 460px;
+  width: calc(100% - 40px);
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--text-gray);
+  padding: 12px 24px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  border-radius: 16px;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+}
+
+.nav-btn.active {
+  color: var(--primary-blue-light);
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.nav-btn i {
+  font-size: 20px;
+}
+
+/* ═══════════════════════════════════════════════════
+   ROOM CARDS - Glass effect with images (40% transparency)
+   ═══════════════════════════════════════════════════ */
+.room-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.room-card:active {
+  transform: scale(0.98);
+}
+
+.room-card:hover:not(.disabled) {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-large);
+}
+
+.room-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.room-image {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Если изображение не загрузилось, показываем иконку */
+.room-image:not([style*="background-image"]) .room-icon-fallback,
+.room-image[style*="background-image: url('')"] .room-icon-fallback {
+  display: flex !important;
+}
+
+.room-image::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 70%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px 20px;
+  gap: 12px;
+}
+
+.room-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: -0.3px;
+}
+
+.room-status {
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.status-free {
+  background: rgba(16, 185, 129, 0.15);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-busy {
+  background: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.room-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px 16px;
+  font-size: 14px;
+  color: var(--text-gray);
+}
+
+.room-price {
+  font-weight: 700;
+  color: var(--primary-blue);
+  font-size: 20px;
+}
+
+/* ═══════════════════════════════════════════════════
+   FLOOR SELECTION - Large glass cards (liquid glass 40% transparency)
+   ═══════════════════════════════════════════════════ */
+.floor-card {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border-radius: 28px;
+  padding: 28px;
+  cursor: pointer;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.floor-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.floor-card:hover::before {
+  opacity: 1;
+}
+
+.floor-card:active {
+  transform: scale(0.98);
+}
+
+.floor-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-large);
+  border-color: rgba(59, 130, 246, 0.3);
+}
+
+.floor-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.floor-content h3 {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-light);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.floor-subtitle {
+  color: #cbd5e1;
+  font-size: 15px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.floor-details {
+  color: var(--text-gray);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.floor-icon {
+  font-size: 48px;
+  color: var(--primary-blue);
+  opacity: 0.8;
+}
+
+/* ═══════════════════════════════════════════════════
+   BACK BUTTON - Glass floating button
+   ═══════════════════════════════════════════════════ */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--dark-glass);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--primary-blue-light);
+  padding: 10px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  margin-top: 0;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-soft);
+  transition: all 0.2s ease;
+  position: absolute;
+  top: 20px;
+  right: 10px;
+  z-index: 10;
+}
+
+.back-btn:active {
+  transform: scale(0.95);
+}
+
+.back-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  box-shadow: var(--shadow-medium);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.back-btn i {
+  margin-right: 6px;
+  font-size: 14px;
+}
+
+/* Специальный стиль для кнопки "Назад" в разделе "Мои бронирования" */
+#bookings-screen .back-btn {
+  position: relative;
+  top: auto;
+  right: auto;
+  margin-top: 0;
+  margin-bottom: 20px;
+  display: inline-flex;
+  width: auto;
+}
+
+@media (max-width: 480px) {
+  .back-btn {
+    position: absolute;
+    top: 20px;
+    right: 10px;
+    margin-top: 0;
+    display: inline-flex;
+  }
+  
+  #bookings-screen .back-btn {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+  
+  .card-header {
+    padding-right: 20px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   MODAL WINDOWS - Full screen glass overlay
+   ═══════════════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2000;
+  padding: 0;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: rgba(30, 41, 59, 0.95);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  border-radius: 32px 32px 0 0;
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 -10px 60px rgba(0, 0, 0, 0.8);
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Анимация для текста "Загрузка..." */
+@keyframes loadingDots {
+	0%, 20% {
+		content: 'Загрузка';
+	}
+	40% {
+		content: 'Загрузка.';
+	}
+	60% {
+		content: 'Загрузка..';
+	}
+	80%, 100% {
+		content: 'Загрузка...';
+	}
+}
+
+.loading-text {
+	position: relative;
+}
+
+.loading-text::after {
+	content: '...';
+	animation: loadingDotsPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes loadingDotsPulse {
+	0%, 100% {
+		opacity: 0.3;
+	}
+	50% {
+		opacity: 1;
+	}
+}
+
+/* Альтернативный вариант - анимированные точки */
+.loading-animated {
+	display: inline-block;
+}
+
+.loading-animated::after {
+	content: '...';
+	animation: dotPulse 1.4s steps(4, end) infinite;
+}
+
+@keyframes dotPulse {
+	0%, 20% {
+		content: '';
+	}
+	40% {
+		content: '.';
+	}
+	60% {
+		content: '..';
+	}
+	80%, 100% {
+		content: '...';
+	}
+}
+
+/* Анимация точек для "Загрузка..." */
+.loading-dots {
+	display: inline-block;
+	position: relative;
+}
+
+.loading-dots::after {
+	content: '...';
+	animation: dotsBlink 1.4s ease-in-out infinite;
+	opacity: 0.4;
+	margin-left: 2px;
+}
+
+@keyframes dotsBlink {
+	0% {
+		opacity: 0.2;
+	}
+	33% {
+		opacity: 0.6;
+	}
+	66% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0.2;
+	}
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-content .card-header {
+  border-radius: 28px;
+  margin: 20px;
+  margin-bottom: 0;
+}
+
+/* ═══════════════════════════════════════════════════
+   CALENDAR & TIME SELECTION - Glass buttons
+   ═══════════════════════════════════════════════════ */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.day-btn {
+  padding: 16px 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--dark-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-light);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.day-btn:active {
+  transform: scale(0.95);
+}
+
+.day-btn:hover {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.day-btn.active {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  transform: scale(1.02);
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  padding: 4px;
+}
+
+.time-btn {
+  padding: 14px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  background: var(--dark-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: var(--text-light);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-btn:active {
+  transform: scale(0.95);
+}
+
+.time-btn:hover:not(:disabled) {
+  background: rgba(51, 65, 85, 0.8);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.time-btn.active {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  transform: scale(1.02);
+}
+
+.time-btn.busy {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.2);
+  cursor: not-allowed;
+}
+
+.time-btn.past {
+  background: rgba(100, 116, 139, 0.1);
+  color: #94a3b8;
+  border-color: rgba(100, 116, 139, 0.2);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.time-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.hour-btn {
+  padding: 18px 12px;
+  border-radius: 16px;
+  border: 2px solid rgba(59, 130, 246, 0.3);
+  background: var(--dark-card);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  color: var(--text-light);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hour-btn:active {
+  transform: scale(0.95);
+}
+
+.hour-btn:hover {
+  background: rgba(30, 41, 59, 0.9);
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.hour-btn.active {
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4);
+  transform: scale(1.05);
+}
+
+/* ═══════════════════════════════════════════════════
+   FORMS - Glass input fields
+   ═══════════════════════════════════════════════════ */
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 10px;
+  color: var(--text-light);
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 16px;
+  background: var(--dark-glass);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 16px;
+  color: var(--text-light);
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  background: rgba(51, 65, 85, 0.8);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+
+.input-field::placeholder {
+  color: #64748b;
+}
+
+/* ═══════════════════════════════════════════════════
+   UTILITIES
+   ═══════════════════════════════════════════════════ */
+.text-center { text-align: center; }
+.text-gray { color: var(--text-gray); }
+.text-light { color: var(--text-light); }
+.mb-2 { margin-bottom: 8px; }
+.mb-4 { margin-bottom: 16px; }
+.mt-2 { margin-top: 8px; }
+.mt-4 { margin-top: 16px; }
+.p-4 { padding: 16px; }
+.p-6 { padding: 24px; }
+.space-y-2 > * + * { margin-top: 8px; }
+.space-y-4 > * + * { margin-top: 16px; }
+
+.coins-display {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 8px 0;
+  color: #60A5FA;
+  padding: 8px 16px;
+  background: rgba(59, 130, 246, 0.2);
+  border-radius: 12px;
+  display: inline-block;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.space-between { justify-content: space-between; }
+.flex-1 { flex: 1; }
+.gap-2 { gap: 8px; }
+
+/* ═══════════════════════════════════════════════════
+   SPINNER - iOS style
+   ═══════════════════════════════════════════════════ */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(59, 130, 246, 0.2);
+  border-top-color: var(--primary-blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ═══════════════════════════════════════════════════
+   BOOKING CARD ANIMATIONS
+   ═══════════════════════════════════════════════════ */
+.booking-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.booking-card.removing {
+  animation: slideOutFade 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes slideOutFade {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    max-height: 500px;
+    margin-bottom: 16px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%) scale(0.95);
+    max-height: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+}
+
+@keyframes slideDown {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   SCROLLBAR - iOS style
+   ═══════════════════════════════════════════════════ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+/* ═══════════════════════════════════════════════════
+   LEGEND - Glass style
+   ═══════════════════════════════════════════════════ */
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-gray);
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  margin-right: 6px;
+}
+
+.legend-free { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+.legend-busy { background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); }
+.legend-past { background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%); }
+
+/* ═══════════════════════════════════════════════════
+   BADGE - Glass tag pills
+   ═══════════════════════════════════════════════════ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--dark-glass);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-right: 8px;
+  margin-bottom: 8px;
+  color: var(--text-light);
+}
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  body {
+    padding: 16px;
+    padding-bottom: 100px;
+  }
+  
+  .card-header h2 {
+    font-size: 28px;
+  }
+  
+  .floor-content h3 {
+    font-size: 24px;
+  }
+  
+  .nav-bar {
+    bottom: 16px;
+    width: calc(100% - 32px);
+  }
+}
+
+
