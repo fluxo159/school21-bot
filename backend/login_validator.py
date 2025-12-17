@@ -25,6 +25,10 @@ def validate_login(login):
     
     login = login.strip()
     
+    # Специальное исключение для админа
+    if login.lower() == 'admin':
+        return True, ''
+    
     # 1. Проверка длины
     if len(login) != 8:
         return False, f'Логин должен быть ровно 8 символов. Текущая длина: {len(login)}'
