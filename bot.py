@@ -16,8 +16,8 @@ if not BACKEND_URL:
     raise ValueError("❌ BACKEND_URL не установлен в .env файле!")
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Генерируем ссылку с startapp параметром
-    web_app_url = f"{BACKEND_URL}?startapp={update.effective_user.id}"
+    # Генерируем ссылку с startapp параметром и параметром для пропуска ngrok warning
+    web_app_url = f"{BACKEND_URL}?startapp={update.effective_user.id}&ngrok-skip-browser-warning=true"
     
     # Кнопка "Открыть" для запуска мини-приложения
     button = KeyboardButton(
@@ -45,9 +45,11 @@ async def post_init(app: Application) -> None:
     
     try:
         # Устанавливаем кнопку меню для всех пользователей (chat_id=None означает глобальная настройка)
+        # Добавляем параметр для пропуска ngrok warning
+        menu_url = f"{BACKEND_URL}?ngrok-skip-browser-warning=true" if BACKEND_URL else BACKEND_URL
         menu_button = MenuButtonWebApp(
             text="Открыть",
-            web_app=WebAppInfo(url=BACKEND_URL)
+            web_app=WebAppInfo(url=menu_url)
         )
         await app.bot.set_chat_menu_button(chat_id=None, menu_button=menu_button)
         print("✅ Кнопка меню бота установлена в списке чатов")

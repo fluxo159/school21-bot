@@ -1,3 +1,2 @@
-web: cd backend && gunicorn app:app --bind 0.0.0.0:$PORT
-bot: python bot.py
+web: cd backend && gunicorn -c gunicorn_config.py app:app
 

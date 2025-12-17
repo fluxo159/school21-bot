@@ -5,6 +5,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 		<title>Бронирование комнат • Школа 21</title>
 		<meta name="ngrok-skip-browser-warning" content="69420" />
+		<!-- Telegram Web App настройки -->
+		<meta name="telegram-web-app-theme-color" content="#667eea" />
 		<script src="https://telegram.org/js/telegram-web-app.js"></script>
 		<link
 			rel="stylesheet"
@@ -24,9 +26,14 @@
 				</button>
 				
 				<!-- Иконка пользователя в правом верхнем углу -->
-				<button class="user-profile-btn" onclick="showRegistrationScreen()" data-i18n-title="editProfile">
-					<i class="fas fa-user"></i>
-				</button>
+				<div style="display: flex; gap: 8px;">
+					<button class="user-profile-btn" onclick="showLoginScreen()" data-i18n-title="switchProfile" title="Переключить профиль">
+						<i class="fas fa-exchange-alt"></i>
+					</button>
+					<button class="user-profile-btn" onclick="showRegistrationScreen()" data-i18n-title="editProfile" title="Редактировать профиль">
+						<i class="fas fa-user"></i>
+					</button>
+				</div>
 				
 				<h2 data-i18n="selectFloor">Выберите этаж</h2>
 				<div class="coins-display" id="user-coins-floor">🪙 100</div>
@@ -101,42 +108,147 @@
 				<div class="card-header">
 					<h2 data-i18n="welcome">👋 Добро пожаловать!</h2>
 					<p id="user-info-reg" class="text-gray loading-dots" data-i18n="loading">Загрузка</p>
-					<div class="coins-display">🪙 100</div>
-					<p class="text-gray mt-2" style="font-size: 14px;" data-i18n="receivedCoins">Вы получили 100 коинов за регистрацию!</p>
 				</div>
 
 				<div class="card">
-					<h3 class="mb-4" style="font-size: 22px; font-weight: 700;" data-i18n="completeRegistration">Завершите регистрацию</h3>
-					<p class="text-gray mb-4" data-i18n="registrationDescription">
-						Для бронирования комнат укажите ваш школьный логин и номер телефона
-					</p>
+					<!-- Переключатель между входом и регистрацией -->
+					<div style="display: flex; gap: 8px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.05); padding: 4px; border-radius: 12px;">
+						<button 
+							id="login-tab" 
+							class="tab-button active" 
+							onclick="switchToLogin()"
+							style="flex: 1; padding: 10px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+							<i class="fas fa-sign-in-alt"></i> Войти
+						</button>
+						<button 
+							id="register-tab" 
+							class="tab-button" 
+							onclick="switchToRegister()"
+							style="flex: 1; padding: 10px; border: none; background: transparent; color: #94a3b8; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+							<i class="fas fa-user-plus"></i> Регистрация
+						</button>
+					</div>
 
+					<!-- Форма входа -->
+					<div id="login-form" style="display: block;">
+						<h3 class="mb-4" style="font-size: 22px; font-weight: 700;">Вход в профиль</h3>
+						<p class="text-gray mb-4">
+							Введите логин и телефон для входа в существующий профиль
+						</p>
+
+						<div class="input-group">
+							<label for="login-school-login" class="input-label">Школьный логин *</label>
+							<input
+								type="text"
+								id="login-school-login"
+								class="input-field"
+								placeholder="your_login"
+								required
+							/>
+						</div>
+
+						<div class="input-group">
+							<label for="login-phone" class="input-label">Номер телефона *</label>
+							<input
+								type="tel"
+								id="login-phone"
+								class="input-field"
+								placeholder="+998-00-000-00-00"
+								value="+998-"
+								required
+								pattern="\+998-[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
+							/>
+						</div>
+
+						<button class="btn btn-primary" onclick="loginUser()" style="width: 100%;">
+							<i class="fas fa-sign-in-alt"></i>&nbsp; Войти
+						</button>
+					</div>
+
+					<!-- Форма регистрации -->
+					<div id="register-form" style="display: none;">
+						<h3 class="mb-4" style="font-size: 22px; font-weight: 700;">Регистрация</h3>
+						<p class="text-gray mb-4">
+							Создайте новый профиль для бронирования комнат
+						</p>
+
+						<div class="input-group">
+							<label for="school-login" class="input-label" data-i18n="schoolLogin">Школьный логин *</label>
+							<input
+								type="text"
+								id="school-login"
+								class="input-field"
+								placeholder="your_login"
+								required
+							/>
+						</div>
+
+						<div class="input-group">
+							<label for="phone" class="input-label" data-i18n="phoneNumber">Номер телефона *</label>
+							<input
+								type="tel"
+								id="phone"
+								class="input-field"
+								placeholder="+998-00-000-00-00"
+								required
+								pattern="\+998-[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
+							/>
+						</div>
+
+						<button class="btn btn-primary" onclick="registerUser()" style="width: 100%;">
+							<i class="fas fa-user-plus"></i>&nbsp; Зарегистрироваться
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Экран входа/переключения профилей -->
+		<div id="login-screen" class="screen" style="display: none">
+			<div class="container">
+				<div class="card-header">
+					<h2>🔐 Вход в профиль</h2>
+					<p class="text-gray" style="font-size: 14px; margin-top: 8px;">Введите логин и телефон для входа</p>
+				</div>
+				
+				<div class="card">
+					<h3 class="mb-4" style="font-size: 22px; font-weight: 700;">Вход</h3>
+					<p class="text-gray mb-4">
+						Введите логин и телефон пользователя для входа в его профиль
+					</p>
+					
 					<div class="input-group">
-						<label for="school-login" class="input-label" data-i18n="schoolLogin">Школьный логин *</label>
+						<label for="login-school-login" class="input-label">Школьный логин *</label>
 						<input
 							type="text"
-							id="school-login"
+							id="login-school-login"
 							class="input-field"
 							placeholder="your_login"
 							required
 						/>
 					</div>
-
+					
 					<div class="input-group">
-						<label for="phone" class="input-label" data-i18n="phoneNumber">Номер телефона *</label>
+						<label for="login-phone" class="input-label">Номер телефона *</label>
 						<input
 							type="tel"
-							id="phone"
+							id="login-phone"
 							class="input-field"
 							placeholder="+998-00-000-00-00"
 							required
 							pattern="\+998-[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}"
 						/>
 					</div>
-
-					<button class="btn btn-primary" onclick="registerUser()">
-						<i class="fas fa-check"></i>&nbsp; <span data-i18n="continue">Продолжить</span>
+					
+					<button class="btn btn-primary" onclick="loginUser()">
+						<i class="fas fa-sign-in-alt"></i>&nbsp; Войти
 					</button>
+					
+					<div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+						<button class="btn btn-secondary" onclick="showRegistrationScreen()" style="width: 100%;">
+							<i class="fas fa-user-plus"></i>&nbsp; Зарегистрировать нового пользователя
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -170,6 +282,149 @@
 					<button class="btn btn-primary" onclick="location.reload()">
 						<i class="fas fa-sync"></i>&nbsp; <span data-i18n="reload">Перезагрузить</span>
 					</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- Экран админки -->
+		<div id="admin-screen" class="screen" style="display: none">
+			<div class="container">
+				<div class="card-header">
+					<div class="admin-header-wrapper">
+						<div class="admin-header-content">
+							<h2>🔐 Админ-панель</h2>
+							<p class="text-gray" style="font-size: 14px; margin-top: 8px;">Статистика пользователей и времени в комнатах</p>
+						</div>
+						<button 
+							class="btn btn-secondary admin-exit-btn" 
+							onclick="exitAdmin()"
+						>
+							<i class="fas fa-sign-out-alt"></i>&nbsp; Выйти
+						</button>
+					</div>
+				</div>
+				
+				<!-- Выбор месяца и года -->
+				<div class="card" style="margin-bottom: 20px;">
+					<div style="display: flex; gap: 12px; margin-bottom: 16px;">
+						<div style="flex: 1;">
+							<label for="month-select" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #374151;">Месяц:</label>
+							<select id="month-select" class="input-field" onchange="onPeriodChange()">
+								<option value="1">Январь</option>
+								<option value="2">Февраль</option>
+								<option value="3">Март</option>
+								<option value="4">Апрель</option>
+								<option value="5">Май</option>
+								<option value="6">Июнь</option>
+								<option value="7">Июль</option>
+								<option value="8">Август</option>
+								<option value="9">Сентябрь</option>
+								<option value="10">Октябрь</option>
+								<option value="11">Ноябрь</option>
+								<option value="12">Декабрь</option>
+							</select>
+						</div>
+						<div style="flex: 1;">
+							<label for="year-select" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #374151;">Год:</label>
+							<input 
+								type="number" 
+								id="year-select" 
+								class="input-field" 
+								min="2024" 
+								max="2100" 
+								onchange="onPeriodChange()"
+							/>
+						</div>
+					</div>
+					
+					<label style="display: block; font-weight: 600; margin-bottom: 12px; font-size: 14px; color: #374151;">Выберите неделю:</label>
+					<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+						<button 
+							class="btn btn-secondary week-btn" 
+							data-week="1" 
+							onclick="selectWeek(1)"
+							style="padding: 12px; font-size: 14px; font-weight: 600;"
+						>
+							1 неделя
+						</button>
+						<button 
+							class="btn btn-secondary week-btn" 
+							data-week="2" 
+							onclick="selectWeek(2)"
+							style="padding: 12px; font-size: 14px; font-weight: 600;"
+						>
+							2 неделя
+						</button>
+						<button 
+							class="btn btn-secondary week-btn" 
+							data-week="3" 
+							onclick="selectWeek(3)"
+							style="padding: 12px; font-size: 14px; font-weight: 600;"
+						>
+							3 неделя
+						</button>
+						<button 
+							class="btn btn-secondary week-btn" 
+							data-week="4" 
+							onclick="selectWeek(4)"
+							style="padding: 12px; font-size: 14px; font-weight: 600;"
+						>
+							4 неделя
+						</button>
+					</div>
+					<p id="week-range" class="text-gray" style="font-size: 12px; margin-top: 12px; text-align: center; font-weight: 600;"></p>
+				</div>
+				
+				<!-- Фильтры, поиск и кнопка обновления -->
+				<div class="card" style="margin-bottom: 20px;">
+					<div style="display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-end;">
+						<div style="flex: 1;">
+							<label for="admin-filter" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #374151;">Фильтр:</label>
+							<select id="admin-filter" class="input-field" onchange="onAdminFilterChange()">
+								<option value="all">Все пользователи</option>
+								<option value="with-bookings">Только с бронированиями</option>
+							</select>
+						</div>
+						<button class="btn btn-primary" onclick="loadAdminStats()" style="padding: 12px 20px; white-space: nowrap;">
+							<i class="fas fa-sync-alt"></i>&nbsp; Обновить
+						</button>
+					</div>
+					<div style="margin-top: 12px;">
+						<label for="admin-search" style="display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; color: #374151;">
+							<i class="fas fa-search"></i>&nbsp; Поиск по логину:
+						</label>
+						<input 
+							type="text" 
+							id="admin-search" 
+							class="input-field" 
+							placeholder="Введите логин для поиска..."
+							oninput="onAdminSearchChange()"
+							style="width: 100%;"
+						/>
+					</div>
+				</div>
+				
+				<!-- Блок онлайн пользователей -->
+				<div id="admin-online-users" style="margin-bottom: 24px; display: none;">
+					<div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 16px;">
+						<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+							<h3 style="margin: 0; font-size: 18px; font-weight: 700;">
+								<i class="fas fa-circle" style="color: #34d399; animation: pulse 2s infinite;"></i>&nbsp; Онлайн пользователи
+							</h3>
+							<span id="online-count" style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 14px;">0</span>
+						</div>
+						<div id="online-users-list" style="max-height: 200px; overflow-y: auto;">
+							<!-- Список онлайн пользователей -->
+						</div>
+					</div>
+				</div>
+				
+				<div id="admin-loading" class="text-center" style="padding: 40px;">
+					<p class="text-gray loading-dots">Загрузка данных...</p>
+				</div>
+				
+				<div id="admin-users-container">
+					<!-- Здесь будет таблица пользователей -->
 				</div>
 			</div>
 		</div>

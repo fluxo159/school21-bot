@@ -23,17 +23,7 @@ if (!window.userCoins) {
     window.userCoins = 100;
 }
 
-function isTimeInPast(selectedDate, selectedTime) {
-	const now = new Date()
-	const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`)
-	return selectedDateTime < now
-}
-// Проверить, является ли время занятым
-function isTimeSlotBusy(roomId, date, startTime, endTime) {
-    // TODO: Реализовать проверку через API
-    // Пока возвращаем заглушку
-    return false;
-}
+// Удалены неиспользуемые функции isTimeInPast и isTimeSlotBusy
 async function getBusyTimeSlots(roomId, date) {
 	try {
 		const response = await fetch(`/api/rooms/${roomId}/busy-slots?date=${date}`)
@@ -152,6 +142,7 @@ function openBookingModal(room) {
 		// Очищаем выбранные данные в любом случае при открытии нового бронирования
 		localStorage.removeItem('selectedDate')
 		localStorage.removeItem('selectedTime')
+		localStorage.removeItem('selectedTimes')
 		localStorage.removeItem('selectedHours')
 	}
 	
@@ -302,16 +293,19 @@ function getBookingStepContent() {
 // Контент выбора даты
 function getDateSelectionContent() {
     const days = getNextDays();
+    const selectedDate = localStorage.getItem('selectedDate');
     
     return `
         <div class="mb-4">
             <p class="text-gray mb-3" style="font-size: 15px; font-weight: 600;">${window.t ? window.t('selectDate') : 'Выберите дату бронирования'}</p>
             <div class="calendar-grid" id="calendar-days">
-                ${days.map(day => `
-                    <button class="day-btn" data-date="${day.value}">
+                ${days.map(day => {
+					const isSelected = selectedDate === day.value
+					return `
+                    <button class="day-btn ${isSelected ? 'selected' : ''}" data-date="${day.value}">
                         ${day.label}
                     </button>
-                `).join('')}
+                `}).join('')}
             </div>
         </div>
         
@@ -422,6 +416,16 @@ function getTimeSelectionContent() {
             buttonContent += `<br><span style="font-size:10px;color:#94a3b8;">${window.t ? window.t('past') : 'Прошло'}</span>`;
         }
         
+        // Проверяем, был ли этот слот выбран ранее
+        const selectedTimesJson = localStorage.getItem('selectedTimes');
+        const selectedTimes = selectedTimesJson ? JSON.parse(selectedTimesJson) : [];
+        const isSelected = selectedTimes.includes(slot.value);
+        
+        // Если слот был выбран ранее и не занят/не прошедший, добавляем класс selected
+        if (isSelected && !isDisabled) {
+            buttonClass += ' selected';
+        }
+        
         timeSlotsHTML += `
             <button class="${buttonClass}" data-time="${slot.value}" ${isDisabled ? 'disabled' : ''}>
                 ${buttonContent}
@@ -431,22 +435,13 @@ function getTimeSelectionContent() {
     
     return `
         <div class="mb-4">
-            <p class="text-gray mb-3" style="font-size: 15px; font-weight: 600;">${window.t ? window.t('selectTime') : 'Время начала'}</p>
+            <p class="text-gray mb-3" style="font-size: 15px; font-weight: 600;">${window.t ? window.t('selectTime') : 'Выберите время (можно выбрать несколько)'}</p>
             <div class="time-grid" id="time-slots">
                 ${timeSlotsHTML}
             </div>
-        </div>
-        
-        <div class="mb-4">
-            <p class="text-gray mb-3" style="font-size: 15px; font-weight: 600;">${window.t ? window.t('duration') : 'Длительность'}</p>
-            <div class="hours-grid" id="hours-selection">
-                ${[1, 2, 3, 4].map(hours => `
-                    <button class="hour-btn" data-hours="${hours}">
-                        <div style="font-size: 18px; font-weight: 700;">${hours} ${window.t ? (hours > 1 ? window.t('hours') : window.t('hour')) : (hours > 1 ? 'часа' : 'час')}</div>
-                        <div style="font-size: 13px; margin-top: 4px; color: #3B82F6;">${window.selectedRoom.price * hours} 🪙</div>
-                    </button>
-                `).join('')}
-            </div>
+            <p class="text-gray mt-2" style="font-size: 12px; opacity: 0.7;">
+                💡 ${window.t ? window.t('selectMultipleTimes') : 'Нажмите на время, чтобы выбрать. Каждый слот = 1 час'}
+            </p>
         </div>
         
         <div class="flex space-between gap-2">
@@ -480,9 +475,19 @@ function getTimeSelectionContent() {
 // Контент подтверждения
 function getConfirmationContent() {
     const selectedDate = localStorage.getItem('selectedDate');
-    const selectedTime = localStorage.getItem('selectedTime');
-    const selectedHours = parseInt(localStorage.getItem('selectedHours') || '1');
-    const totalPrice = window.selectedRoom.price * selectedHours;
+    const selectedTimesJson = localStorage.getItem('selectedTimes');
+    const selectedTimes = selectedTimesJson ? JSON.parse(selectedTimesJson) : [];
+    
+    if (selectedTimes.length === 0) {
+        return `
+            <div class="mb-4">
+                <p class="text-center text-gray">${window.t ? window.t('noTimeSelected') : 'Не выбрано время'}</p>
+            </div>
+        `;
+    }
+    
+    const slotsCount = selectedTimes.length;
+    const totalPrice = window.selectedRoom.price * slotsCount;
     
     const date = new Date(selectedDate);
     const dateStr = date.toLocaleDateString('ru-RU', { 
@@ -490,6 +495,19 @@ function getConfirmationContent() {
         month: 'long',
         year: 'numeric'
     });
+    
+    // Формируем список выбранных временных слотов
+    const timeSlotsList = selectedTimes.map((time, index) => {
+        const timeStr = time.slice(0, 5); // HH:MM
+        const endHour = parseInt(timeStr.split(':')[0]) + 1;
+        const endTimeStr = `${endHour.toString().padStart(2, '0')}:00`;
+        return `
+            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(59, 130, 246, 0.1);">
+                <span class="text-gray">🕐 ${timeStr} - ${endTimeStr}</span>
+                <span style="font-weight: 600; color: #10b981;">${window.selectedRoom.price} 🪙</span>
+            </div>
+        `;
+    }).join('');
     
     return `
         <div class="mb-4">
@@ -506,13 +524,11 @@ function getConfirmationContent() {
                         <span class="text-gray">📅 Дата:</span>
                         <span style="font-weight: 600;">${dateStr}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span class="text-gray">🕐 ${window.t ? window.t('time') : 'Время'}:</span>
-                        <span style="font-weight: 600;">${selectedTime.slice(0, 5)}</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span class="text-gray">⏱️ ${window.t ? window.t('duration') : 'Длительность'}:</span>
-                        <span style="font-weight: 600;">${selectedHours} ${window.t ? (selectedHours > 1 ? window.t('hours') : window.t('hour')) : (selectedHours > 1 ? 'часа' : 'час')}</span>
+                    <div style="margin-top: 12px;">
+                        <span class="text-gray" style="display: block; margin-bottom: 8px;">🕐 ${window.t ? window.t('selectedTimes') : 'Выбранные слоты'} (${slotsCount}):</span>
+                        <div style="background: rgba(16, 185, 129, 0.1); border-radius: 8px; padding: 12px;">
+                            ${timeSlotsList}
+                        </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding-top: 12px; margin-top: 12px; border-top: 1px solid rgba(59, 130, 246, 0.15);">
                         <span class="text-gray">💰 ${window.t ? window.t('cost') : 'Стоимость'}:</span>
@@ -625,9 +641,11 @@ async function initCalendar() {
 			console.log('📅 Клик по дате:', clickedDate)
 			
 			// Снять активный класс со всех кнопок
-			modal.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'))
-			// Добавить активный класс текущей кнопке
-			btn.classList.add('active')
+			modal.querySelectorAll('.day-btn').forEach(b => {
+				b.classList.remove('active', 'selected')
+			})
+			// Добавить активный и selected класс текущей кнопке (selected для пульсации)
+			btn.classList.add('active', 'selected')
 
 			const date = btn.dataset.date
 			localStorage.setItem('selectedDate', date)
@@ -655,24 +673,42 @@ async function initCalendar() {
 	setTimeout(() => {
 		const timeSlots = modal.querySelector('#time-slots')
 		if (timeSlots) {
-			const timeClickHandler = function (e) {
-				const btn = e.target.closest('.time-btn:not(:disabled)')
-				if (!btn) return
-				
-				e.preventDefault()
-				e.stopPropagation()
-				
-				console.log('🕐 Клик по времени:', btn.dataset.time)
-				
-				// Снять активный класс со всех кнопок времени
-				timeSlots.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'))
-				// Добавить активный класс текущей кнопке
-				btn.classList.add('active')
-
-				const time = btn.dataset.time
-				localStorage.setItem('selectedTime', time)
-				checkTimeSelection()
+		const timeClickHandler = function (e) {
+			const btn = e.target.closest('.time-btn:not(:disabled)')
+			if (!btn) return
+			
+			e.preventDefault()
+			e.stopPropagation()
+			
+			const time = btn.dataset.time
+			console.log('🕐 Клик по времени:', time)
+			
+			// Переключаем выбор (toggle) - если уже выбран, снимаем выбор
+			if (btn.classList.contains('selected')) {
+				btn.classList.remove('selected')
+				console.log('❌ Снят выбор времени:', time)
+			} else {
+				btn.classList.add('selected')
+				console.log('✅ Выбрано время:', time)
 			}
+
+			// Сохраняем массив выбранных временных слотов
+			const selectedTimes = Array.from(timeSlots.querySelectorAll('.time-btn.selected:not(:disabled)'))
+				.map(b => b.dataset.time)
+				.sort() // Сортируем по времени
+			
+			// Сохраняем в localStorage как JSON массив
+			localStorage.setItem('selectedTimes', JSON.stringify(selectedTimes))
+			
+			// Для обратной совместимости сохраняем первый выбранный слот как selectedTime
+			if (selectedTimes.length > 0) {
+				localStorage.setItem('selectedTime', selectedTimes[0])
+			} else {
+				localStorage.removeItem('selectedTime')
+			}
+			
+			checkTimeSelection()
+		}
 			
 			// Удаляем старый обработчик, если был
 			if (timeSlots._timeHandler) {
@@ -683,36 +719,7 @@ async function initCalendar() {
 			modal._calendarHandlers.push({ element: timeSlots, handler: timeClickHandler, event: 'click' })
 		}
 
-		// Выбор часов - используем делегирование событий
-		const hoursSelection = modal.querySelector('#hours-selection')
-		if (hoursSelection) {
-			const hoursClickHandler = function (e) {
-				const btn = e.target.closest('.hour-btn')
-				if (!btn) return
-				
-				e.preventDefault()
-				e.stopPropagation()
-				
-				console.log('⏰ Клик по часам:', btn.dataset.hours)
-				
-				// Снять активный класс со всех кнопок часов
-				hoursSelection.querySelectorAll('.hour-btn').forEach(b => b.classList.remove('active'))
-				// Добавить активный класс текущей кнопке
-				btn.classList.add('active')
-
-				const hours = btn.dataset.hours
-				localStorage.setItem('selectedHours', hours)
-				checkTimeSelection()
-			}
-			
-			// Удаляем старый обработчик, если был
-			if (hoursSelection._hoursHandler) {
-				hoursSelection.removeEventListener('click', hoursSelection._hoursHandler)
-			}
-			hoursSelection.addEventListener('click', hoursClickHandler)
-			hoursSelection._hoursHandler = hoursClickHandler
-			modal._calendarHandlers.push({ element: hoursSelection, handler: hoursClickHandler, event: 'click' })
-		}
+		// Логика множественного выбора времени уже обрабатывается в timeClickHandler
 	}, 100)
 }
 
@@ -722,9 +729,10 @@ function checkTimeSelection() {
     const nextBtn = modal.querySelector('#next-btn');
     
     if (nextBtn) {
-        const hasTime = localStorage.getItem('selectedTime');
-        const hasHours = localStorage.getItem('selectedHours');
-        nextBtn.disabled = !(hasTime && hasHours);
+        const selectedTimesJson = localStorage.getItem('selectedTimes');
+        const selectedTimes = selectedTimesJson ? JSON.parse(selectedTimesJson) : [];
+        // Кнопка активна, если выбрано хотя бы одно время
+        nextBtn.disabled = selectedTimes.length === 0;
     }
 }
 
@@ -765,6 +773,7 @@ function closeBookingModal() {
     window.bookingStep = 'select-date';
     localStorage.removeItem('selectedDate');
     localStorage.removeItem('selectedTime');
+    localStorage.removeItem('selectedTimes');
     localStorage.removeItem('selectedHours');
 }
 
@@ -896,15 +905,14 @@ async function confirmBooking() {
 	const telegram_id = window.currentUser.telegram_id
 	const room_id = window.selectedRoom?.id
 	const date = localStorage.getItem('selectedDate')
-	const start_time = localStorage.getItem('selectedTime')
-	const hours = parseInt(localStorage.getItem('selectedHours') || '1')
+	const selectedTimesJson = localStorage.getItem('selectedTimes')
+	const selectedTimes = selectedTimesJson ? JSON.parse(selectedTimesJson) : []
 
 	console.log('📊 Проверяем данные:', {
 		telegram_id,
 		room_id,
 		date,
-		start_time,
-		hours,
+		selectedTimes,
 		selectedRoom: window.selectedRoom,
 	})
 
@@ -919,141 +927,137 @@ async function confirmBooking() {
 		return
 	}
 
-	if (!date || !start_time) {
+	if (!date || selectedTimes.length === 0) {
 		alert(`❌ ${window.t ? window.t('selectDateAndTime') : 'Ошибка: выберите дату и время'}`)
 		return
 	}
-	
-	// Проверяем что hours валидное число
-	if (isNaN(hours) || hours < 1 || hours > 24) {
-		alert(`❌ ${window.t ? window.t('invalidHours') : 'Ошибка: неверное количество часов (должно быть от 1 до 24)'}`)
-		return
-	}
 
-	// 3. Форматируем время (убираем секунды если есть)
-	// Используем уже отформатированное время из проверки выше
-	const formatted_start_time_final = start_time.includes(':')
-		? start_time.split(':').slice(0, 2).join(':')
-		: start_time
-
-	// 4. Вычисляем время окончания с учетом перехода через полночь
-	const startHour = parseInt(formatted_start_time_final.split(':')[0])
-	const startMinute = parseInt(formatted_start_time_final.split(':')[1] || '0')
+	// 3. Проверяем баланс коинов
+	const slotsCount = selectedTimes.length
+	const totalPrice = window.selectedRoom.price * slotsCount
 	
-	// Вычисляем общее количество минут от начала дня
-	const startTotalMinutes = startHour * 60 + startMinute
-	const endTotalMinutes = startTotalMinutes + (hours * 60)
-	
-	// Вычисляем час и минуту окончания
-	let endHour = Math.floor(endTotalMinutes / 60) % 24
-	let endMinute = endTotalMinutes % 60
-	
-	// Если время окончания переходит через полночь (endHour < startHour или endTotalMinutes >= 1440)
-	const crossesMidnight = endTotalMinutes >= 1440 || (endHour < startHour && endTotalMinutes > startTotalMinutes)
-	
-	const end_time = `${endHour.toString().padStart(2, '0')}:${endMinute.toString().padStart(2, '0')}`
-	
-	console.log('🕐 Вычисление времени окончания:', {
-		startHour,
-		startMinute,
-		hours,
-		startTotalMinutes,
-		endTotalMinutes,
-		endHour,
-		endMinute,
-		crossesMidnight,
-		end_time
-	})
-
-	console.log('🕐 Форматированные данные:', {
-		telegram_id,
-		room_id: parseInt(room_id),
-		date,
-		start_time: formatted_start_time_final,
-		end_time,
-		hours,
-		price: window.selectedRoom?.price,
-		total_cost: window.selectedRoom?.price
-			? window.selectedRoom.price * hours
-			: 'unknown',
-	})
-
-	// 5. Проверяем баланс коинов (опционально, на фронтенде)
-	if (
-		window.selectedRoom?.price &&
-		window.userCoins < window.selectedRoom.price * hours
-	) {
-		const needed = window.selectedRoom.price * hours
-		const missing = needed - window.userCoins
+	if (window.selectedRoom?.price && window.userCoins < totalPrice) {
+		const missing = totalPrice - window.userCoins
 		alert(
-			`💰 ${window.t ? window.t('insufficientCoinsMsg') : 'Недостаточно коинов!'}\n${window.t ? window.t('needed') : 'Нужно'}: ${needed} 🪙\n${window.t ? window.t('youHave') : 'У вас'}: ${window.userCoins} 🪙\n${window.t ? window.t('missing') : 'Не хватает'}: ${missing} 🪙`
+			`💰 ${window.t ? window.t('insufficientCoinsMsg') : 'Недостаточно коинов!'}\n${window.t ? window.t('needed') : 'Нужно'}: ${totalPrice} 🪙\n${window.t ? window.t('youHave') : 'У вас'}: ${window.userCoins} 🪙\n${window.t ? window.t('missing') : 'Не хватает'}: ${missing} 🪙`
 		)
 		return
 	}
 
-	// 6. Отправляем запрос на сервер
+	// 4. Создаем бронирования для каждого выбранного временного слота
 	try {
-		console.log('📡 Отправляем запрос на сервер...')
+		console.log('📡 Отправляем запросы на сервер для', slotsCount, 'слотов...')
 
-		const response = await fetch('/api/bookings/create', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Accept: 'application/json',
-			},
-			body: JSON.stringify({
-				telegram_id: telegram_id,
+		const bookingPromises = []
+		const createdBookings = []
+		const failedBookings = []
+
+		// Для каждого временного слота создаем отдельное бронирование (1 час)
+		for (const startTime of selectedTimes) {
+			// Форматируем время начала
+			const formatted_start_time = startTime.includes(':')
+				? startTime.split(':').slice(0, 2).join(':')
+				: startTime
+
+			// Вычисляем время окончания (начало + 1 час)
+			const startHour = parseInt(formatted_start_time.split(':')[0])
+			const startMinute = parseInt(formatted_start_time.split(':')[1] || '0')
+			const endHour = (startHour + 1) % 24
+			const end_time = `${endHour.toString().padStart(2, '0')}:${startMinute.toString().padStart(2, '0')}`
+
+			// Формируем тело запроса
+			const requestBody = {
 				room_id: parseInt(room_id),
 				date: date,
-				start_time: formatted_start_time_final,
+				start_time: formatted_start_time,
 				end_time: end_time,
-			}),
-		})
+			}
+			
+			// Приоритет: логин+телефон (для переключения профилей), иначе telegram_id
+			if (window.currentUser && window.currentUser.school_login && window.currentUser.phone) {
+				requestBody.school_login = window.currentUser.school_login
+				requestBody.phone = window.currentUser.phone
+			} else if (telegram_id) {
+				requestBody.telegram_id = telegram_id
+			}
 
-		console.log('📥 Ответ сервера:', response.status, response.statusText)
+			// Отправляем запрос на создание бронирования
+			const promise = fetch('/api/bookings/create', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+				},
+				body: JSON.stringify(requestBody),
+			}).then(async (response) => {
+				const responseText = await response.text()
+				let data
+				try {
+					data = JSON.parse(responseText)
+				} catch (e) {
+					throw new Error('Невалидный JSON ответ')
+				}
 
-		// Читаем ответ даже если ошибка
-		const responseText = await response.text()
-		console.log('📄 Текст ответа:', responseText)
+				if (response.ok && data.success) {
+					return { success: true, booking_id: data.booking_id, time: formatted_start_time }
+				} else {
+					throw new Error(data.error || 'Ошибка создания бронирования')
+				}
+			}).catch((error) => {
+				return { success: false, error: error.message, time: formatted_start_time }
+			})
 
-		let data
-		try {
-			data = JSON.parse(responseText)
-		} catch (e) {
-			console.error('❌ Невалидный JSON ответ:', responseText)
-			throw new Error(window.t ? window.t('invalidResponse') : 'Сервер вернул невалидный ответ')
+			bookingPromises.push(promise)
 		}
 
-		if (response.ok && data.success) {
-			console.log('✅ Успех! Данные:', data)
+		// Ждем завершения всех запросов
+		const results = await Promise.all(bookingPromises)
 
-			// Успешное бронирование
+		// Разделяем успешные и неудачные бронирования
+		results.forEach(result => {
+			if (result.success) {
+				createdBookings.push(result)
+			} else {
+				failedBookings.push(result)
+			}
+		})
+
+		console.log('📊 Результаты бронирования:', {
+			created: createdBookings.length,
+			failed: failedBookings.length,
+			total: slotsCount
+		})
+
+		// Успешное бронирование
+		if (createdBookings.length > 0) {
 			if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
 				Telegram.WebApp.HapticFeedback.notificationOccurred('success')
 			}
 
-			// Обновляем баланс коинов
-			if (window.selectedRoom?.price) {
-				window.userCoins -= window.selectedRoom.price * hours
+			// Обновляем баланс коинов с сервера
+			if (typeof window.loadCoinsFromServer === 'function') {
+				setTimeout(() => {
+					window.loadCoinsFromServer()
+				}, 300)
+			} else if (window.selectedRoom?.price) {
+				window.userCoins -= totalPrice
 				window.updateCoinsDisplay()
-				console.log(`💰 Баланс обновлен: ${window.userCoins} 🪙`)
 			}
 
-			// Показываем уведомление с деталями
+			// Показываем уведомление
 			const roomName = window.selectedRoom?.name || 'Комната'
-			const cost = window.selectedRoom?.price
-				? window.selectedRoom.price * hours
-				: '?'
+			let message = `✅ ${createdBookings.length} ${window.t ? window.t('bookingsCreated') : 'бронирований создано'}!\n\n📋 ${window.t ? window.t('bookingDetails') : 'Детали'}:\n• ${window.t ? window.t('room') : 'Комната'}: ${roomName}\n• ${window.t ? window.t('date') : 'Дата'}: ${new Date(date).toLocaleDateString('ru-RU')}\n• ${window.t ? window.t('slotsCount') : 'Слотов'}: ${createdBookings.length}\n• ${window.t ? window.t('bookingCost') : 'Стоимость'}: ${totalPrice} 🪙`
+			
+			if (failedBookings.length > 0) {
+				message += `\n\n⚠️ ${failedBookings.length} ${window.t ? window.t('bookingsFailed') : 'бронирований не удалось создать'}`
+			}
 
-			alert(
-				`✅ ${window.t ? window.t('bookingSuccessMsg') : 'Бронирование создано успешно!'}\n\n📋 ${window.t ? window.t('bookingDetails') : 'Детали'}:\n• ${window.t ? window.t('room') : 'Комната'}: ${roomName}\n• ${window.t ? window.t('date') : 'Дата'}: ${new Date(
-					date
-				).toLocaleDateString(
-					'ru-RU'
-				)}\n• ${window.t ? window.t('bookingTime') : 'Время'}: ${formatted_start_time_final} - ${end_time}\n• ${window.t ? window.t('bookingCost') : 'Стоимость'}: ${cost} 🪙\n• ${window.t ? window.t('bookingIdLabel') : 'ID брони'}: ${
-					data.booking_id
-				}`
-			)
+			// Запускаем confetti при успешном бронировании
+			if (createdBookings.length > 0) {
+				createConfetti()
+			}
+
+			alert(message)
 
 			// Обновляем занятые слоты для выбранной даты
 			const selectedDate = localStorage.getItem('selectedDate')
@@ -1069,36 +1073,39 @@ async function confirmBooking() {
 			if (window.currentFloor) {
 				window.loadRoomsByFloor(window.currentFloor)
 			}
-		} else {
-			// Ошибка бронирования
-			console.error('❌ Ошибка от сервера:', data)
 
-			// Делаем ошибки более понятными для пользователя
-			let userMessage = data.error || (window.t ? window.t('unknownError') : 'Неизвестная ошибка')
-
-			if (data.error.includes('прошедшие даты') || data.error.includes('прошедшее время') || data.error.includes('прошло')) {
-				userMessage = window.t ? window.t('pastDateError') : '📅 Нельзя бронировать прошедшую дату или время!\n\nПожалуйста, выберите сегодня или будущую дату и время.'
-			} else if (data.error.includes('занято') || data.error.includes('уже занято')) {
-				userMessage = window.t ? window.t('timeAlreadyBooked') : '⏰ Это время уже занято другим пользователем.\n\nПожалуйста, выберите другое время или другую комнату.'
-			} else if (data.error.includes('Недостаточно коинов')) {
-				userMessage = `💰 ${window.t ? window.t('insufficientCoinsMsg') : 'Недостаточно коинов!'}\n\n${window.t ? window.t('needed') : 'Нужно'}: ${
-					window.selectedRoom?.price || '?'
-				} 🪙\n${window.t ? window.t('youHave') : 'У вас'}: ${
-					window.userCoins
-				} 🪙\n\n${window.t ? window.t('topUpBalance') : 'Пополните баланс или выберите более дешевую комнату.'}`
-			} else if (data.error.includes('Пользователь не найден')) {
-				userMessage = window.t ? window.t('authErrorReload') : '👤 Ошибка авторизации.\n\nПожалуйста, перезагрузите страницу или откройте приложение через бота Telegram.'
-			} else if (data.error.includes('Комната не найдена')) {
-				userMessage = window.t ? window.t('roomNotFoundDetails') : '🚪 Комната не найдена.\n\nВозможно, она была удалена или деактивирована.'
+			// Обновляем список бронирований, если пользователь находится на экране "Мои бронирования"
+			// Используем refreshBookingsList для обновления без переключения экрана
+			if (typeof refreshBookingsList === 'function') {
+				// Вызываем с небольшой задержкой, чтобы сервер успел обработать запрос
+				setTimeout(() => {
+					refreshBookingsList()
+				}, 500)
+			} else if (typeof window.refreshBookingsList === 'function') {
+				setTimeout(() => {
+					window.refreshBookingsList()
+				}, 500)
+			} else if (typeof loadMyBookings === 'function') {
+				// Fallback: если refreshBookingsList недоступна, используем loadMyBookings
+				setTimeout(() => {
+					loadMyBookings()
+					console.log('✅ Список бронирований обновлен (через loadMyBookings)')
+				}, 500)
+			} else if (typeof window.loadMyBookings === 'function') {
+				setTimeout(() => {
+					window.loadMyBookings()
+					console.log('✅ Список бронирований обновлен (через window.loadMyBookings)')
+				}, 500)
 			}
-
-			// Вибрация ошибки
+		} else {
+			// Ошибка бронирования - все слоты не удалось создать
+			console.error('❌ Ошибка: не удалось создать ни одного бронирования')
+			
 			if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
 				Telegram.WebApp.HapticFeedback.notificationOccurred('error')
 			}
-
-			// Показываем красивый alert
-			alert(`❌ ${userMessage}`)
+			
+			alert(`❌ ${window.t ? window.t('bookingFailed') : 'Не удалось создать бронирования'}\n\n${window.t ? window.t('tryAgain') : 'Попробуйте еще раз или выберите другое время.'}`)
 		}
 	} catch (error) {
 		console.error('🔥 Критическая ошибка:', error)
@@ -1164,4 +1171,31 @@ try {
 	}
 } catch (error) {
 	console.error('❌ Ошибка при экспорте функций booking.js:', error)
+}
+
+// Функция для создания confetti при успешном бронировании
+function createConfetti() {
+	const container = document.createElement('div')
+	container.className = 'confetti-container'
+	document.body.appendChild(container)
+
+	// Создаем 50 частиц конфетти
+	for (let i = 0; i < 50; i++) {
+		const confetti = document.createElement('div')
+		confetti.className = 'confetti'
+		confetti.style.left = Math.random() * 100 + '%'
+		confetti.style.animationDuration = (Math.random() * 2 + 2) + 's'
+		confetti.style.animationDelay = Math.random() * 0.5 + 's'
+		container.appendChild(confetti)
+	}
+
+	// Удаляем контейнер после завершения анимации
+	setTimeout(() => {
+		container.remove()
+	}, 3000)
+}
+
+// Экспортируем функцию confetti
+if (typeof window !== 'undefined') {
+	window.createConfetti = createConfetti
 }

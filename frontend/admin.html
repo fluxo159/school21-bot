@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Админка • Статистика пользователей</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="style.css" />
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .admin-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+        
+        .stat-card .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .table-header {
+            background: #f9fafb;
+            padding: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .table-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            color: #111827;
+        }
+        
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background: #f3f4f6;
+        }
+        
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #111827;
+        }
+        
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+        
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .badge-primary {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-gray {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .loading i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            background: #5568d3;
+        }
+        
+        .refresh-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .time-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 10px;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-wrapper {
+                overflow-x: scroll;
+            }
+            
+            table {
+                min-width: 800px;
+            }
+        }
+    </style>
+</head>
+<body style="background: #f3f4f6; min-height: 100vh;">
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1><i class="fas fa-chart-line"></i> Админ-панель</h1>
+            <p>Статистика пользователей и времени в комнатах</p>
+        </div>
+        
+        <div class="stats-cards" id="stats-cards">
+            <div class="stat-card">
+                <div class="stat-label">Всего пользователей</div>
+                <div class="stat-value" id="total-users">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Всего времени</div>
+                <div class="stat-value" id="total-time">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Среднее время</div>
+                <div class="stat-value" id="avg-time">-</div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <div class="table-header">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2><i class="fas fa-table"></i> Таблица пользователей</h2>
+                    <button class="refresh-btn" onclick="loadUsersStats()">
+                        <i class="fas fa-sync-alt"></i> Обновить
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <div id="loading" class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p style="margin-top: 10px;">Загрузка данных...</p>
+                </div>
+                
+                <table id="users-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Логин пира</th>
+                            <th>Телефон</th>
+                            <th>Telegram ID</th>
+                            <th>Коины</th>
+                            <th>Общее время</th>
+                            <th>Дата регистрации</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                    </tbody>
+                </table>
+                
+                <div id="no-data" class="no-data" style="display: none;">
+                    <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i>
+                    <p>Нет данных для отображения</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function loadUsersStats() {
+            const loadingEl = document.getElementById('loading');
+            const tableEl = document.getElementById('users-table');
+            const tbodyEl = document.getElementById('users-tbody');
+            const noDataEl = document.getElementById('no-data');
+            
+            loadingEl.style.display = 'block';
+            tableEl.style.display = 'none';
+            noDataEl.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/admin/users-stats');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Ошибка загрузки данных');
+                }
+                
+                const users = data.users || [];
+                
+                // Обновляем статистику
+                document.getElementById('total-users').textContent = data.total_users || 0;
+                
+                // Считаем общее время
+                const totalHours = users.reduce((sum, user) => sum + user.total_hours, 0);
+                const totalHoursInt = Math.floor(totalHours);
+                const totalMinutesInt = Math.round((totalHours - totalHoursInt) * 60);
+                
+                let totalTimeDisplay = '';
+                if (totalHoursInt === 0 && totalMinutesInt === 0) {
+                    totalTimeDisplay = '0 мин';
+                } else if (totalHoursInt === 0) {
+                    totalTimeDisplay = `${totalMinutesInt} мин`;
+                } else if (totalMinutesInt === 0) {
+                    totalTimeDisplay = `${totalHoursInt} ч`;
+                } else {
+                    totalTimeDisplay = `${totalHoursInt} ч ${totalMinutesInt} мин`;
+                }
+                
+                document.getElementById('total-time').textContent = totalTimeDisplay;
+                
+                // Среднее время
+                const avgHours = users.length > 0 ? totalHours / users.length : 0;
+                const avgHoursInt = Math.floor(avgHours);
+                const avgMinutesInt = Math.round((avgHours - avgHoursInt) * 60);
+                
+                let avgTimeDisplay = '';
+                if (avgHoursInt === 0 && avgMinutesInt === 0) {
+                    avgTimeDisplay = '0 мин';
+                } else if (avgHoursInt === 0) {
+                    avgTimeDisplay = `${avgMinutesInt} мин`;
+                } else if (avgMinutesInt === 0) {
+                    avgTimeDisplay = `${avgHoursInt} ч`;
+                } else {
+                    avgTimeDisplay = `${avgHoursInt} ч ${avgMinutesInt} мин`;
+                }
+                
+                document.getElementById('avg-time').textContent = avgTimeDisplay;
+                
+                // Заполняем таблицу
+                if (users.length === 0) {
+                    noDataEl.style.display = 'block';
+                } else {
+                    tbodyEl.innerHTML = users.map((user, index) => {
+                        const date = new Date(user.created_at);
+                        const formattedDate = date.toLocaleDateString('ru-RU', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        return `
+                            <tr>
+                                <td><strong>${index + 1}</strong></td>
+                                <td>
+                                    <span class="badge ${user.school_login === 'Не указан' ? 'badge-gray' : 'badge-primary'}">
+                                        ${user.school_login}
+                                    </span>
+                                </td>
+                                <td>${user.phone}</td>
+                                <td><code style="background: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${user.telegram_id}</code></td>
+                                <td>
+                                    <span class="badge badge-success">
+                                        🪙 ${user.coins}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="time-badge">${user.time_display}</span>
+                                </td>
+                                <td>${formattedDate}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    tableEl.style.display = 'table';
+                }
+                
+            } catch (error) {
+                console.error('Ошибка загрузки данных:', error);
+                alert('Ошибка загрузки данных: ' + error.message);
+            } finally {
+                loadingEl.style.display = 'none';
+            }
+        }
+        
+        // Загружаем данные при загрузке страницы
+        document.addEventListener('DOMContentLoaded', loadUsersStats);
+        
+        // Автообновление каждые 30 секунд
+        setInterval(loadUsersStats, 30000);
+    </script>
+</body>
+</html>
+

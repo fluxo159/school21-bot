@@ -687,6 +687,133 @@ body::before {
 	animation: loadingDotsPulse 1.5s ease-in-out infinite;
 }
 
+/* ═══════════════════════════════════════════════════
+   REGISTRATION PROMPT - Анимированное уведомление
+   ═══════════════════════════════════════════════════ */
+#registration-prompt {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(15, 23, 42, 0.85);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+#registration-prompt.show {
+	opacity: 1;
+}
+
+.prompt-content {
+	background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 24px;
+	padding: 32px;
+	max-width: 400px;
+	width: 90%;
+	text-align: center;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+	transform: scale(0.8) translateY(20px);
+	animation: promptAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes promptAppear {
+	0% {
+		transform: scale(0.8) translateY(20px);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(1) translateY(0);
+		opacity: 1;
+	}
+}
+
+.prompt-icon {
+	width: 80px;
+	height: 80px;
+	margin: 0 auto 20px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 36px;
+	color: white;
+	animation: iconBounce 1s ease-in-out infinite;
+	box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes iconBounce {
+	0%, 100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-10px) scale(1.05);
+	}
+}
+
+.prompt-content h3 {
+	font-size: 24px;
+	font-weight: 700;
+	margin-bottom: 12px;
+	color: var(--text-light);
+}
+
+.prompt-content p {
+	font-size: 16px;
+	color: var(--text-gray);
+	margin-bottom: 24px;
+	line-height: 1.5;
+}
+
+.prompt-button {
+	width: 100%;
+	padding: 14px 24px;
+	font-size: 16px;
+	font-weight: 600;
+	border-radius: 12px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border: none;
+	color: white;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.prompt-button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.prompt-button:active {
+	transform: translateY(0);
+}
+
+.prompt-close {
+	width: 100%;
+	padding: 10px 24px;
+	font-size: 14px;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: var(--text-gray);
+	cursor: pointer;
+	transition: all 0.3s ease;
+}
+
+.prompt-close:hover {
+	background: rgba(255, 255, 255, 0.15);
+	color: var(--text-light);
+}
+
 @keyframes loadingDotsPulse {
 	0%, 100% {
 		opacity: 0.3;
@@ -807,6 +934,27 @@ body::before {
   transform: scale(1.02);
 }
 
+/* Пульсация для выбранной даты */
+.day-btn.selected {
+  animation: datePulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+.day-btn.selected::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.3);
+  transform: translate(-50%, -50%) scale(1);
+  animation: datePulseRing 2s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
 .time-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -846,6 +994,26 @@ body::before {
   border-color: transparent;
   box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
   transform: scale(1.02);
+}
+
+/* Выбранные временные слоты (зеленый цвет) */
+.time-btn.selected {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+  transform: scale(1.02);
+  position: relative;
+}
+
+.time-btn.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
 }
 
 .time-btn.busy {
@@ -910,18 +1078,10 @@ body::before {
 /* ═══════════════════════════════════════════════════
    FORMS - Glass input fields
    ═══════════════════════════════════════════════════ */
-.input-group {
-  margin-bottom: 20px;
-}
 
-.input-label {
-  display: block;
-  margin-bottom: 10px;
-  color: var(--text-light);
-  font-weight: 600;
-  font-size: 15px;
-}
-
+/* ═══════════════════════════════════════════════════
+   INPUT FIELDS - Анимированные поля ввода
+   ═══════════════════════════════════════════════════ */
 .input-field {
   width: 100%;
   padding: 16px;
@@ -932,18 +1092,203 @@ body::before {
   border-radius: 16px;
   color: var(--text-light);
   font-size: 15px;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  height: 52px;
+  position: relative;
+  overflow: hidden;
 }
 
+/* Анимированная граница при фокусе */
+.input-field::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), transparent);
+  transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+  border-radius: 16px;
+}
+
+.input-field:focus::before {
+  left: 100%;
+}
+
+/* Плавное изменение при фокусе */
 .input-field:focus {
   outline: none;
   border-color: var(--primary-blue);
-  background: rgba(51, 65, 85, 0.8);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  background: rgba(51, 65, 85, 0.85);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2),
+              0 8px 24px rgba(59, 130, 246, 0.15);
+  transform: translateY(-1px);
+  border-width: 2px;
 }
 
+/* Анимация при вводе текста */
+.input-field:not(:placeholder-shown) {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(51, 65, 85, 0.75);
+}
+
+/* Плавный placeholder */
 .input-field::placeholder {
   color: #64748b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.7;
+}
+
+.input-field:focus::placeholder {
+  opacity: 0.5;
+  transform: translateX(4px);
+}
+
+/* Анимация при наведении */
+.input-field:hover:not(:focus) {
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(51, 65, 85, 0.7);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+/* Специальные стили для select, чтобы он соответствовал input */
+select.input-field {
+  height: 52px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23f1f5f9' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+/* Анимация для label */
+.input-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: var(--text-light);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left center;
+}
+
+.input-group:focus-within .input-label {
+  color: var(--primary-blue-light);
+  transform: translateX(4px) scale(1.02);
+}
+
+/* Анимация для input-group */
+.input-group {
+  margin-bottom: 20px;
+  position: relative;
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.input-group:nth-child(1) { animation-delay: 0.1s; }
+.input-group:nth-child(2) { animation-delay: 0.2s; }
+.input-group:nth-child(3) { animation-delay: 0.3s; }
+.input-group:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Эффект пульсации при ошибке валидации */
+.input-field:invalid:not(:placeholder-shown) {
+  border-color: rgba(239, 68, 68, 0.5);
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
+
+/* Плавное появление текста при вводе */
+.input-field {
+  text-shadow: 0 0 0 rgba(241, 245, 249, 0);
+  transition: text-shadow 0.3s ease;
+}
+
+.input-field:focus {
+  text-shadow: 0 0 8px rgba(241, 245, 249, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB SWITCHING - Плавные переходы между вкладками
+   ═══════════════════════════════════════════════════ */
+.tab-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.tab-button:hover::before {
+  left: 100%;
+}
+
+.tab-button.active {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Плавное переключение форм */
+#login-form,
+#register-form {
+  opacity: 1;
+  transform: translateX(0);
+  transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+#login-form.hiding,
+#register-form.hiding {
+  opacity: 0;
+  transform: translateX(-20px);
+  pointer-events: none;
+}
+
+#login-form.showing,
+#register-form.showing {
+  opacity: 0;
+  transform: translateX(20px);
+  animation: fadeInSlide 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* ═══════════════════════════════════════════════════
@@ -1124,4 +1469,505 @@ body::before {
   }
 }
 
+/* Стили для админки */
+#admin-screen {
+  padding-bottom: 20px;
+}
+
+.admin-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.admin-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-exit-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+#admin-users-container {
+  margin-top: 20px;
+}
+
+#admin-users-container table {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#admin-users-container table thead tr {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+#admin-users-container table tbody tr:last-child {
+  border-bottom: none;
+}
+
+#admin-users-container table tbody tr:hover {
+  background: #f9fafb;
+}
+
+#admin-loading {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .admin-header-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .admin-exit-btn {
+    width: 100%;
+    margin-top: 12px;
+  }
+  
+  .admin-header-content h2 {
+    font-size: 24px;
+  }
+  
+  .admin-header-content p {
+    font-size: 13px;
+  }
+  
+  #admin-users-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  #admin-users-container table {
+    min-width: 600px;
+  }
+  
+  #admin-users-container table th,
+  #admin-users-container table td {
+    font-size: 11px;
+    padding: 10px 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-header-content h2 {
+    font-size: 22px;
+  }
+  
+  .admin-header-content p {
+    font-size: 12px;
+  }
+  
+  .admin-exit-btn {
+    font-size: 12px;
+    padding: 10px 16px;
+  }
+  
+  /* Кнопки недель на мобильных */
+  .week-btn {
+    font-size: 12px !important;
+    padding: 10px 8px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════
+   REGISTRATION PROMPT - Анимированное уведомление
+   ═══════════════════════════════════════════════════ */
+#registration-prompt {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(15, 23, 42, 0.85);
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 0.3s ease;
+}
+
+#registration-prompt.show {
+	opacity: 1;
+}
+
+.prompt-content {
+	background: linear-gradient(135deg, rgba(51, 65, 85, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 24px;
+	padding: 32px;
+	max-width: 400px;
+	width: 90%;
+	text-align: center;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+	transform: scale(0.8) translateY(20px);
+	animation: promptAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+@keyframes promptAppear {
+	0% {
+		transform: scale(0.8) translateY(20px);
+		opacity: 0;
+	}
+	100% {
+		transform: scale(1) translateY(0);
+		opacity: 1;
+	}
+}
+
+.prompt-icon {
+	width: 80px;
+	height: 80px;
+	margin: 0 auto 20px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 36px;
+	color: white;
+	animation: iconBounce 1s ease-in-out infinite;
+	box-shadow: 0 8px 32px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes iconBounce {
+	0%, 100% {
+		transform: translateY(0) scale(1);
+	}
+	50% {
+		transform: translateY(-10px) scale(1.05);
+	}
+}
+
+.prompt-content h3 {
+	font-size: 24px;
+	font-weight: 700;
+	margin-bottom: 12px;
+	color: var(--text-light);
+}
+
+.prompt-content p {
+	font-size: 16px;
+	color: var(--text-gray);
+	margin-bottom: 24px;
+	line-height: 1.5;
+}
+
+.prompt-button {
+	width: 100%;
+	padding: 14px 24px;
+	font-size: 16px;
+	font-weight: 600;
+	border-radius: 12px;
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	border: none;
+	color: white;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.prompt-button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.prompt-button:active {
+	transform: translateY(0);
+}
+
+.prompt-close {
+	width: 100%;
+	padding: 10px 24px;
+	font-size: 14px;
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: var(--text-gray);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	border-radius: 12px;
+}
+
+.prompt-close:hover {
+	background: rgba(255, 255, 255, 0.15);
+	color: var(--text-light);
+}
+
+
+/* ═══════════════════════════════════════════════════
+   SKELETON SCREENS - Пульсирующие блоки загрузки
+   ═══════════════════════════════════════════════════ */
+.skeleton {
+	background: linear-gradient(90deg, 
+		rgba(51, 65, 85, 0.3) 0%, 
+		rgba(71, 85, 105, 0.5) 50%, 
+		rgba(51, 65, 85, 0.3) 100%);
+	background-size: 200% 100%;
+	animation: skeletonPulse 1.5s ease-in-out infinite;
+	border-radius: 16px;
+}
+
+@keyframes skeletonPulse {
+	0% {
+		background-position: 200% 0;
+	}
+	100% {
+		background-position: -200% 0;
+	}
+}
+
+.skeleton-room-card {
+	height: 200px;
+	margin-bottom: 16px;
+	border-radius: 28px;
+}
+
+.skeleton-booking-card {
+	height: 120px;
+	margin-bottom: 16px;
+	border-radius: 20px;
+}
+
+/* ═══════════════════════════════════════════════════
+   CONFETTI - Анимация конфетти при успехе
+   ═══════════════════════════════════════════════════ */
+.confetti-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 10000;
+	overflow: hidden;
+}
+
+.confetti {
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	background: #3B82F6;
+	border-radius: 2px;
+	animation: confettiFall linear forwards;
+}
+
+.confetti:nth-child(2n) { background: #10b981; }
+.confetti:nth-child(3n) { background: #f59e0b; }
+.confetti:nth-child(4n) { background: #ef4444; }
+.confetti:nth-child(5n) { background: #8b5cf6; }
+
+@keyframes confettiFall {
+	0% {
+		transform: translateY(-100vh) rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(100vh) rotate(720deg);
+		opacity: 0;
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+   STAGGER ANIMATION - Последовательное появление
+   ═══════════════════════════════════════════════════ */
+/* Stagger анимация применяется к .room-card через начальное состояние */
+.room-card {
+	opacity: 0;
+	transform: translateY(20px);
+	animation: staggerFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	position: relative;
+	overflow: hidden;
+}
+
+.room-card:nth-child(1) { animation-delay: 0.05s; }
+.room-card:nth-child(2) { animation-delay: 0.1s; }
+.room-card:nth-child(3) { animation-delay: 0.15s; }
+.room-card:nth-child(4) { animation-delay: 0.2s; }
+.room-card:nth-child(5) { animation-delay: 0.25s; }
+.room-card:nth-child(6) { animation-delay: 0.3s; }
+.room-card:nth-child(7) { animation-delay: 0.35s; }
+.room-card:nth-child(8) { animation-delay: 0.4s; }
+.room-card:nth-child(9) { animation-delay: 0.45s; }
+.room-card:nth-child(n+10) { animation-delay: 0.5s; }
+
+@keyframes staggerFadeIn {
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.booking-card {
+	opacity: 0;
+	transform: translateX(-20px);
+	animation: staggerSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.booking-card:nth-child(1) { animation-delay: 0.05s; }
+.booking-card:nth-child(2) { animation-delay: 0.1s; }
+.booking-card:nth-child(3) { animation-delay: 0.15s; }
+.booking-card:nth-child(4) { animation-delay: 0.2s; }
+.booking-card:nth-child(5) { animation-delay: 0.25s; }
+.booking-card:nth-child(6) { animation-delay: 0.3s; }
+.booking-card:nth-child(n+7) { animation-delay: 0.35s; }
+
+@keyframes staggerSlideIn {
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+   ROOM CARD HOVER ANIMATIONS - Улучшенные эффекты
+   ═══════════════════════════════════════════════════ */
+/* Hover эффекты применяются к существующим .room-card */
+.room-card {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.room-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+	transition: left 0.5s;
+	pointer-events: none;
+	z-index: 1;
+}
+
+.room-card:hover::before {
+	left: 100%;
+}
+
+.room-card:hover {
+	transform: translateY(-4px) scale(1.02) !important;
+	box-shadow: 0 12px 40px rgba(59, 130, 246, 0.3);
+	border-color: rgba(59, 130, 246, 0.4);
+}
+
+.room-card:active {
+	transform: translateY(-2px) scale(1.01) !important;
+}
+
+/* ═══════════════════════════════════════════════════
+   SCREEN TRANSITIONS - Плавные переходы между экранами
+   ═══════════════════════════════════════════════════ */
+.screen {
+	animation: screenFadeIn 0.3s ease-out forwards;
+}
+
+.screen.slide-left {
+	animation: screenSlideLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.screen.slide-right {
+	animation: screenSlideRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes screenFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes screenSlideLeft {
+	from {
+		opacity: 0;
+		transform: translateX(100%);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes screenSlideRight {
+	from {
+		opacity: 0;
+		transform: translateX(-100%);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+   CALENDAR DATE PULSE - Пульсация выбранной даты
+   ═══════════════════════════════════════════════════ */
+.calendar-day.selected {
+	animation: datePulse 2s ease-in-out infinite;
+	position: relative;
+}
+
+.calendar-day.selected::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100%;
+	height: 100%;
+	border-radius: 12px;
+	background: rgba(59, 130, 246, 0.3);
+	transform: translate(-50%, -50%) scale(1);
+	animation: datePulseRing 2s ease-in-out infinite;
+	pointer-events: none;
+	z-index: -1;
+}
+
+@keyframes datePulse {
+	0%, 100% {
+		transform: scale(1);
+		box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+	}
+	50% {
+		transform: scale(1.05);
+		box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+	}
+}
+
+@keyframes datePulseRing {
+	0% {
+		transform: translate(-50%, -50%) scale(1);
+		opacity: 0.8;
+	}
+	100% {
+		transform: translate(-50%, -50%) scale(1.5);
+		opacity: 0;
+	}
+}
+
+/* ═══════════════════════════════════════════════════
+   ONLINE USERS PULSE - Пульсация индикатора онлайн
+   ═══════════════════════════════════════════════════ */
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.5;
+		transform: scale(1.2);
+	}
+}
 
