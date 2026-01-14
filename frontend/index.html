@@ -218,10 +218,10 @@
 					</p>
 					
 					<div class="input-group">
-						<label for="login-school-login" class="input-label">Школьный логин *</label>
+						<label for="login-screen-school-login" class="input-label">Школьный логин *</label>
 						<input
 							type="text"
-							id="login-school-login"
+							id="login-screen-school-login"
 							class="input-field"
 							placeholder="your_login"
 							required
@@ -229,10 +229,10 @@
 					</div>
 					
 					<div class="input-group">
-						<label for="login-phone" class="input-label">Номер телефона *</label>
+						<label for="login-screen-phone" class="input-label">Номер телефона *</label>
 						<input
 							type="tel"
-							id="login-phone"
+							id="login-screen-phone"
 							class="input-field"
 							placeholder="+998-00-000-00-00"
 							required
@@ -439,6 +439,34 @@
 				<i class="fas fa-calendar-alt"></i>
 				<span data-i18n="bookings">Бронирования</span>
 			</button>
+		</div>
+
+		<!-- Модальное окно для ввода пароля админки -->
+		<div id="admin-password-modal" class="admin-password-modal" style="display: none;">
+			<div class="admin-password-modal-content">
+				<div class="admin-password-modal-header">
+					<h3>🔐 Доступ к админ-панели</h3>
+					<button class="admin-password-close" onclick="closeAdminPasswordModal()">
+						<i class="fas fa-times"></i>
+					</button>
+				</div>
+				<div class="admin-password-modal-body">
+					<p class="admin-password-label">Введите пароль:</p>
+					<input 
+						type="password" 
+						id="admin-password-input" 
+						class="admin-password-input"
+						placeholder="Пароль"
+						autocomplete="off"
+					/>
+					<div id="admin-password-error" class="admin-password-error" style="display: none;">
+						❌ Неверный пароль
+					</div>
+					<button class="btn btn-primary" onclick="checkAdminPassword()" style="width: 100%; margin-top: 16px;">
+						<i class="fas fa-key"></i> Войти
+					</button>
+				</div>
+			</div>
 		</div>
 
 		<script src="app.js"></script>

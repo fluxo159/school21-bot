@@ -1,5 +1,5 @@
 # backend/app.py
-from flask import Flask, send_from_directory, jsonify, request, Response
+from flask import Flask, send_from_directory, jsonify, request, Response, abort
 from flask_cors import CORS
 import os
 from models import User, Room, Booking
@@ -28,11 +28,6 @@ except Exception as e:
 @app.route('/')
 def index():
     return send_from_directory('../frontend', 'index.html')
-
-# Для любых других файлов
-@app.route('/<path:path>')
-def static_files(path):
-    return send_from_directory('../frontend', path)
 
 # 🔐 Аутентификация пользователя по telegram_id (для первой инициализации)
 @app.route('/api/auth', methods=['POST'])
@@ -435,6 +430,12 @@ def create_booking():
 def my_bookings():
     try:
         data = request.json
+        if not data:
+            print("❌ /api/my-bookings: Получен пустой запрос")
+            return jsonify({'error': 'Требуется JSON тело запроса'}), 400
+        
+        print(f"📥 /api/my-bookings: Получен запрос: {data}")
+        
         # Поддерживаем оба способа: по telegram_id (старый) или по логину+телефону (новый)
         telegram_id = data.get('telegram_id')
         school_login = data.get('school_login')
@@ -464,7 +465,10 @@ def my_bookings():
             user_id = user_result[0]
         else:
             conn.close()
+            print(f"❌ /api/my-bookings: Не указаны данные пользователя. Получено: telegram_id={telegram_id}, school_login={school_login}, phone={phone}")
             return jsonify({'error': 'Требуется либо логин+телефон, либо telegram_id'}), 400
+        
+        print(f"✅ /api/my-bookings: Найден user_id={user_id}")
         
         # Обновляем активность пользователя
         update_user_activity(user_id=user_id)
@@ -1388,6 +1392,15 @@ def get_users_stats():
 def admin_page():
     """Страница админки с таблицей пользователей"""
     return send_from_directory('../frontend', 'admin.html')
+
+# Для любых других файлов (должен быть в конце, чтобы не перехватывать API маршруты)
+# Исключаем API маршруты из статического маршрута
+@app.route('/<path:path>')
+def static_files(path):
+    # Не обрабатываем API маршруты через статический маршрут
+    if path.startswith('api/'):
+        abort(404)
+    return send_from_directory('../frontend', path)
 
 if __name__ == '__main__':
     # ИСПРАВЛЕНО: debug=False по умолчанию для безопасности

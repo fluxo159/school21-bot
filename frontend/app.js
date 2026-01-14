@@ -705,8 +705,8 @@ async function loginUser() {
 	
 	// Если не найдены, пробуем из отдельного экрана входа
 	if (!schoolLogin || !phone) {
-		const loginScreenLogin = document.getElementById('login-screen')?.querySelector('#login-school-login')?.value.trim()
-		const loginScreenPhone = document.getElementById('login-screen')?.querySelector('#login-phone')?.value.trim()
+		const loginScreenLogin = document.getElementById('login-screen-school-login')?.value.trim()
+		const loginScreenPhone = document.getElementById('login-screen-phone')?.value.trim()
 		if (loginScreenLogin && loginScreenPhone) {
 			schoolLogin = loginScreenLogin
 			phone = loginScreenPhone
@@ -788,8 +788,8 @@ async function loginUser() {
 
 // Вход по логину и телефону (с отдельного экрана входа - старая функция для обратной совместимости)
 async function loginUserFromSeparateScreen() {
-	const schoolLogin = document.getElementById('login-screen')?.querySelector('#login-school-login')?.value.trim()
-	const phone = document.getElementById('login-screen')?.querySelector('#login-phone')?.value.trim()
+	const schoolLogin = document.getElementById('login-screen-school-login')?.value.trim()
+	const phone = document.getElementById('login-screen-phone')?.value.trim()
 	
 	if (!schoolLogin || !phone) {
 		alert('Введите логин и телефон!')
@@ -1732,9 +1732,12 @@ async function loadMyBookings() {
 	} else if (currentUser.telegram_id) {
 		requestBody.telegram_id = currentUser.telegram_id
 	} else {
-		console.error('❌ Не удалось определить пользователя')
+		console.error('❌ Не удалось определить пользователя', currentUser)
 		return
 	}
+
+	console.log('📤 Отправляем запрос на /api/my-bookings:', requestBody)
+	console.log('👤 Текущий пользователь:', currentUser)
 
 	try {
 		const response = await fetch('/api/my-bookings', {
@@ -1742,7 +1745,17 @@ async function loadMyBookings() {
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(requestBody),
 		})
+		
+		console.log('📥 Ответ получен:', response.status, response.statusText)
+		
+		if (!response.ok) {
+			const errorText = await response.text()
+			console.error('❌ Ошибка ответа:', response.status, errorText)
+			throw new Error(`HTTP ${response.status}: ${errorText}`)
+		}
+		
 		const data = await response.json()
+		console.log('📊 Данные получены:', data)
 
 		if (data.success) {
 			displayBookings(data.bookings)
@@ -2395,7 +2408,11 @@ function openBookingModalById(roomId) {
 }
 
 // Запуск приложения
-document.addEventListener('DOMContentLoaded', initApp)
+document.addEventListener('DOMContentLoaded', function() {
+	initApp()
+	// Устанавливаем обработчик долгого нажатия на Санту после загрузки DOM
+	setTimeout(setupAdminSecretAccess, 500)
+})
 
 // Экспортируем функции для использования в HTML
 window.registerUser = registerUser
@@ -2807,6 +2824,137 @@ function stopOnlineUsersAutoRefresh() {
 		clearInterval(onlineUsersInterval)
 		onlineUsersInterval = null
 	}
+}
+
+// Функция для обработки долгого нажатия на Санту (5 секунд для доступа к админке)
+// Полностью скрытая активация - без визуальных эффектов
+function setupAdminSecretAccess() {
+	const santaDecoration = document.getElementById('santa-decoration')
+	if (!santaDecoration) return
+	
+	let pressTimer = null
+	let pressStartTime = null
+	const PRESS_DURATION = 5000 // 5 секунд
+	const ADMIN_PASSWORD = '1406'
+	
+	// Функция для открытия модального окна с паролем
+	function showAdminPasswordModal() {
+		const modal = document.getElementById('admin-password-modal')
+		if (modal) {
+			modal.style.display = 'flex'
+			const passwordInput = document.getElementById('admin-password-input')
+			if (passwordInput) {
+				passwordInput.value = ''
+				passwordInput.focus()
+			}
+		}
+	}
+	
+	// Функция для закрытия модального окна
+	function closeAdminPasswordModal() {
+		const modal = document.getElementById('admin-password-modal')
+		if (modal) {
+			modal.style.display = 'none'
+		}
+		const errorDiv = document.getElementById('admin-password-error')
+		if (errorDiv) {
+			errorDiv.style.display = 'none'
+		}
+	}
+	
+	// Функция для проверки пароля
+	function checkAdminPassword() {
+		const passwordInput = document.getElementById('admin-password-input')
+		const errorDiv = document.getElementById('admin-password-error')
+		
+		if (!passwordInput) return
+		
+		const enteredPassword = passwordInput.value.trim()
+		
+		if (enteredPassword === ADMIN_PASSWORD) {
+			// Пароль правильный - закрываем модальное окно и открываем админку
+			closeAdminPasswordModal()
+			showAdminScreen()
+		} else {
+			// Пароль неправильный - показываем ошибку
+			if (errorDiv) {
+				errorDiv.style.display = 'block'
+			}
+			passwordInput.value = ''
+			passwordInput.focus()
+		}
+	}
+	
+	// Экспортируем функции для использования в HTML
+	window.closeAdminPasswordModal = closeAdminPasswordModal
+	window.checkAdminPassword = checkAdminPassword
+	
+	// Для мобильных устройств (touch)
+	santaDecoration.addEventListener('touchstart', function(e) {
+		e.preventDefault()
+		pressStartTime = Date.now()
+		pressTimer = setTimeout(function() {
+			const duration = Date.now() - pressStartTime
+			if (duration >= PRESS_DURATION) {
+				console.log('🔐 Долгое нажатие на Санту обнаружено')
+				showAdminPasswordModal()
+			}
+		}, PRESS_DURATION)
+	})
+	
+	santaDecoration.addEventListener('touchend', function(e) {
+		e.preventDefault()
+		if (pressTimer) {
+			clearTimeout(pressTimer)
+			pressTimer = null
+		}
+		pressStartTime = null
+	})
+	
+	santaDecoration.addEventListener('touchcancel', function(e) {
+		e.preventDefault()
+		if (pressTimer) {
+			clearTimeout(pressTimer)
+			pressTimer = null
+		}
+		pressStartTime = null
+	})
+	
+	// Для десктопов (mouse)
+	santaDecoration.addEventListener('mousedown', function(e) {
+		pressStartTime = Date.now()
+		pressTimer = setTimeout(function() {
+			const duration = Date.now() - pressStartTime
+			if (duration >= PRESS_DURATION) {
+				console.log('🔐 Долгое нажатие на Санту обнаружено')
+				showAdminPasswordModal()
+			}
+		}, PRESS_DURATION)
+	})
+	
+	santaDecoration.addEventListener('mouseup', function(e) {
+		if (pressTimer) {
+			clearTimeout(pressTimer)
+			pressTimer = null
+		}
+		pressStartTime = null
+	})
+	
+	santaDecoration.addEventListener('mouseleave', function(e) {
+		if (pressTimer) {
+			clearTimeout(pressTimer)
+			pressTimer = null
+		}
+		pressStartTime = null
+	})
+	
+	// Обработчик нажатия Enter в поле пароля
+	document.addEventListener('keydown', function(e) {
+		const modal = document.getElementById('admin-password-modal')
+		if (modal && modal.style.display === 'flex' && e.key === 'Enter') {
+			checkAdminPassword()
+		}
+	})
 }
 
 // Экспортируем функции
