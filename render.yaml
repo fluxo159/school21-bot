@@ -1,13 +1,29 @@
 services:
   - type: web
     name: school21-bot
-    env: python
+    runtime: python
+    plan: starter
     buildCommand: pip install -r requirements.txt
-    startCommand: cd backend && gunicorn -c gunicorn_config.py app:app
+    startCommand: gunicorn -c backend/gunicorn_config.py backend.app:app
     envVars:
-      - key: PORT
-        value: 10000
-      - key: PYTHON_VERSION
-        value: 3.11.0
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: BACKEND_URL
+        sync: false
+      - key: ADMIN_TELEGRAM_IDS
+        value: ""
+      - key: DEMO_MODE
+        value: "false"
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: DATABASE_PATH
+        value: /var/data/school21.db
+      - key: TZ
+        value: Asia/Tashkent
+      - key: WEB_CONCURRENCY
+        value: "2"
+    disk:
+      name: school21-data
+      mountPath: /var/data
+      sizeGB: 1
     healthCheckPath: /api/ping
-

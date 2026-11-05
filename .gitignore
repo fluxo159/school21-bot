@@ -1,48 +1,52 @@
-# Python
+# Python and build artifacts
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-env/
+.venv/
+.venv-*/
 venv/
+env/
 ENV/
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
+__pypackages__/
 .eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
+build/
+dist/
 
-# Environment variables
+# Local configuration and private datasets
 .env
-.env.local
-
-# Database
+.env.*
+!.env.example
+login.txt
+instance/
 *.db
+*.db-*
 *.sqlite
+*.sqlite-*
 *.sqlite3
-school21.db
+*.sqlite3-*
 
-# IDE
-.vscode/
+# Editors and operating systems
 .idea/
+.vscode/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
+.AppleDouble
+.LSOverride
+._*
 Thumbs.db
+nul
 
-# Logs
+# Logs, coverage and tool caches
 *.log
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

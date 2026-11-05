@@ -9,22 +9,8 @@ console.log('👤 Текущий пользователь при запуске:
 
 // Получить telegram_id из URL параметра startapp
 function getTelegramIdFromUrl() {
-	const urlParams = new URLSearchParams(window.location.search)
-	const startappParam = urlParams.get('startapp')
-
-	if (startappParam) {
-		console.log('📱 Telegram ID из URL:', startappParam)
-		const id = parseInt(startappParam)
-		return isNaN(id) ? null : id
-	}
-
-	// Пробуем получить из Telegram Web App
-	if (Telegram?.WebApp?.initDataUnsafe?.user?.id) {
-		console.log(
-			'📱 Telegram ID из WebApp:',
-			Telegram.WebApp.initDataUnsafe.user.id
-		)
-		return Telegram.WebApp.initDataUnsafe.user.id
+	if (window.Telegram?.WebApp?.initDataUnsafe?.user?.id) {
+		return window.Telegram.WebApp.initDataUnsafe.user.id
 	}
 
 	// Для тестирования в браузере - используем тестовый ID
@@ -208,7 +194,8 @@ async function initApp() {
 			userCoins = data.user.coins || 0
 			// Синхронизируем с window для booking.js
 			window.userCoins = userCoins
-			window.currentUser = data.user  // КРИТИЧНО: для использования в booking.js
+			window.currentUser = data.user  // Used by booking.js
+			updateAdminAccess()
 
 			updateUserInfo(tgUser)
 			updateCoinsDisplay()
@@ -229,8 +216,7 @@ async function initApp() {
 				}))
 				
 				// Проверяем, является ли пользователь админом
-				if (data.user.school_login && data.user.school_login.toLowerCase() === 'admin' && 
-				    data.user.phone === '+998-00-000-00-11') {
+				if (data.user.is_admin) {
 					console.log('🔐 Пользователь является админом, показываем админ-страницу')
 					showAdminScreen()
 				} else {
@@ -752,7 +738,8 @@ async function loginUser() {
 			currentUser = data.user
 			userCoins = data.user.coins || 0
 			window.userCoins = userCoins
-			window.currentUser = data.user  // КРИТИЧНО: для использования в booking.js
+			window.currentUser = data.user  // Used by booking.js
+			updateAdminAccess()
 			
 			// Сохраняем текущий профиль в sessionStorage
 			sessionStorage.setItem('currentProfile', JSON.stringify({
@@ -769,7 +756,7 @@ async function loginUser() {
 			updateCoinsDisplay()
 			
 			// Проверяем, является ли пользователь админом
-			if (schoolLogin.toLowerCase() === 'admin' && phone === '+998-00-000-00-11') {
+			if (window.currentUser?.is_admin === true) {
 				console.log('🔐 Пользователь является админом, показываем админ-страницу')
 				showAdminScreen()
 			} else {
@@ -887,7 +874,8 @@ async function performLogin(schoolLogin, phone) {
 			currentUser = data.user
 			userCoins = data.user.coins || 0
 			window.userCoins = userCoins
-			window.currentUser = data.user  // КРИТИЧНО: для использования в booking.js
+			window.currentUser = data.user  // Used by booking.js
+			updateAdminAccess()
 			
 			// Сохраняем текущий профиль в sessionStorage
 			sessionStorage.setItem('currentProfile', JSON.stringify({
@@ -904,7 +892,7 @@ async function performLogin(schoolLogin, phone) {
 			updateCoinsDisplay()
 			
 			// Проверяем, является ли пользователь админом
-			if (schoolLogin.toLowerCase() === 'admin' && phone === '+998-00-000-00-11') {
+			if (window.currentUser?.is_admin === true) {
 				console.log('🔐 Пользователь является админом, показываем админ-страницу')
 				showAdminScreen()
 			} else {
@@ -915,7 +903,7 @@ async function performLogin(schoolLogin, phone) {
 		} else {
 			// Проверяем, является ли это ошибкой "пользователь не найден"
 			// Но для админа не показываем предложение зарегистрироваться
-			const isAdminAttempt = schoolLogin.toLowerCase() === 'admin' && phone === '+998-00-000-00-11'
+			const isAdminAttempt = window.currentUser?.is_admin === true
 			
 			if (data.error && (data.error.includes('не найден') || data.error.includes('not found'))) {
 				if (isAdminAttempt) {
@@ -1640,7 +1628,7 @@ async function registerUser() {
 	// Валидация формата телефона (узбекский формат: +998-XX-XXX-XX-XX)
 	const phonePattern = /^\+998-[0-9]{2}-[0-9]{3}-[0-9]{2}-[0-9]{2}$/
 	if (!phonePattern.test(phone)) {
-		alert('Неверный формат телефона. Используйте формат: +998-XX-XXX-XX-XX (например: +998-90-870-50-11)')
+		alert('Неверный формат телефона. Используйте формат: +998-XX-XXX-XX-XX (например: +998-XX-XXX-XX-XX)')
 		return
 	}
 
@@ -1663,6 +1651,8 @@ async function registerUser() {
 		const data = await response.json()
 
 		if (data.success) {
+			currentUser.is_admin = data.is_admin === true
+			updateAdminAccess()
 			console.log('✅ Новый пользователь зарегистрирован')
 			
 			if (Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
@@ -1696,7 +1686,7 @@ async function registerUser() {
 			updateCoinsDisplay()
 
 			// Проверяем, является ли пользователь админом
-			if (schoolLogin.toLowerCase() === 'admin' && phone === '+998-00-000-00-11') {
+			if (window.currentUser?.is_admin === true) {
 				console.log('🔐 Пользователь является админом, показываем админ-страницу')
 				showAdminScreen()
 			} else {
@@ -2410,8 +2400,6 @@ function openBookingModalById(roomId) {
 // Запуск приложения
 document.addEventListener('DOMContentLoaded', function() {
 	initApp()
-	// Устанавливаем обработчик долгого нажатия на Санту после загрузки DOM
-	setTimeout(setupAdminSecretAccess, 500)
 })
 
 // Экспортируем функции для использования в HTML
@@ -2827,136 +2815,6 @@ function stopOnlineUsersAutoRefresh() {
 }
 
 // Функция для обработки долгого нажатия на Санту (5 секунд для доступа к админке)
-// Полностью скрытая активация - без визуальных эффектов
-function setupAdminSecretAccess() {
-	const santaDecoration = document.getElementById('santa-decoration')
-	if (!santaDecoration) return
-	
-	let pressTimer = null
-	let pressStartTime = null
-	const PRESS_DURATION = 5000 // 5 секунд
-	const ADMIN_PASSWORD = '1406'
-	
-	// Функция для открытия модального окна с паролем
-	function showAdminPasswordModal() {
-		const modal = document.getElementById('admin-password-modal')
-		if (modal) {
-			modal.style.display = 'flex'
-			const passwordInput = document.getElementById('admin-password-input')
-			if (passwordInput) {
-				passwordInput.value = ''
-				passwordInput.focus()
-			}
-		}
-	}
-	
-	// Функция для закрытия модального окна
-	function closeAdminPasswordModal() {
-		const modal = document.getElementById('admin-password-modal')
-		if (modal) {
-			modal.style.display = 'none'
-		}
-		const errorDiv = document.getElementById('admin-password-error')
-		if (errorDiv) {
-			errorDiv.style.display = 'none'
-		}
-	}
-	
-	// Функция для проверки пароля
-	function checkAdminPassword() {
-		const passwordInput = document.getElementById('admin-password-input')
-		const errorDiv = document.getElementById('admin-password-error')
-		
-		if (!passwordInput) return
-		
-		const enteredPassword = passwordInput.value.trim()
-		
-		if (enteredPassword === ADMIN_PASSWORD) {
-			// Пароль правильный - закрываем модальное окно и открываем админку
-			closeAdminPasswordModal()
-			showAdminScreen()
-		} else {
-			// Пароль неправильный - показываем ошибку
-			if (errorDiv) {
-				errorDiv.style.display = 'block'
-			}
-			passwordInput.value = ''
-			passwordInput.focus()
-		}
-	}
-	
-	// Экспортируем функции для использования в HTML
-	window.closeAdminPasswordModal = closeAdminPasswordModal
-	window.checkAdminPassword = checkAdminPassword
-	
-	// Для мобильных устройств (touch)
-	santaDecoration.addEventListener('touchstart', function(e) {
-		e.preventDefault()
-		pressStartTime = Date.now()
-		pressTimer = setTimeout(function() {
-			const duration = Date.now() - pressStartTime
-			if (duration >= PRESS_DURATION) {
-				console.log('🔐 Долгое нажатие на Санту обнаружено')
-				showAdminPasswordModal()
-			}
-		}, PRESS_DURATION)
-	})
-	
-	santaDecoration.addEventListener('touchend', function(e) {
-		e.preventDefault()
-		if (pressTimer) {
-			clearTimeout(pressTimer)
-			pressTimer = null
-		}
-		pressStartTime = null
-	})
-	
-	santaDecoration.addEventListener('touchcancel', function(e) {
-		e.preventDefault()
-		if (pressTimer) {
-			clearTimeout(pressTimer)
-			pressTimer = null
-		}
-		pressStartTime = null
-	})
-	
-	// Для десктопов (mouse)
-	santaDecoration.addEventListener('mousedown', function(e) {
-		pressStartTime = Date.now()
-		pressTimer = setTimeout(function() {
-			const duration = Date.now() - pressStartTime
-			if (duration >= PRESS_DURATION) {
-				console.log('🔐 Долгое нажатие на Санту обнаружено')
-				showAdminPasswordModal()
-			}
-		}, PRESS_DURATION)
-	})
-	
-	santaDecoration.addEventListener('mouseup', function(e) {
-		if (pressTimer) {
-			clearTimeout(pressTimer)
-			pressTimer = null
-		}
-		pressStartTime = null
-	})
-	
-	santaDecoration.addEventListener('mouseleave', function(e) {
-		if (pressTimer) {
-			clearTimeout(pressTimer)
-			pressTimer = null
-		}
-		pressStartTime = null
-	})
-	
-	// Обработчик нажатия Enter в поле пароля
-	document.addEventListener('keydown', function(e) {
-		const modal = document.getElementById('admin-password-modal')
-		if (modal && modal.style.display === 'flex' && e.key === 'Enter') {
-			checkAdminPassword()
-		}
-	})
-}
-
 // Экспортируем функции
 window.showAdminScreen = showAdminScreen
 window.loadAdminStats = loadAdminStats
@@ -2973,3 +2831,16 @@ window.switchToRegister = switchToRegister
 window.registerUser = registerUser
 window.switchToRegisterAndClosePrompt = switchToRegisterAndClosePrompt
 window.closeRegistrationPrompt = closeRegistrationPrompt
+// Admin visibility follows the server role; every admin API also checks it.
+function updateAdminAccess() {
+    let button = document.getElementById('admin-access-button')
+    if (!button) {
+        button = document.createElement('button')
+        button.id = 'admin-access-button'
+        button.className = 'btn btn-secondary'
+        button.textContent = 'Админ-панель'
+        button.addEventListener('click', showAdminScreen)
+        document.querySelector('#floors-screen .container')?.appendChild(button)
+    }
+    button.style.display = window.currentUser?.is_admin === true ? '' : 'none'
+}

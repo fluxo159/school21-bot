@@ -52,7 +52,7 @@
 								<h3 data-i18n-floor="2">🏢 2 Этаж</h3>
 								<p class="floor-subtitle" data-i18n="floor2Description">3 скайпницы</p>
 								<p class="floor-details" data-i18n="floor2Details">
-									7 коинов/час • До 4 человек • Шумоизоляция
+									До 4 человек • Шумоизоляция
 								</p>
 							</div>
 							<div class="floor-icon">
@@ -67,7 +67,7 @@
 								<h3 data-i18n-floor="3">🏢 3 Этаж</h3>
 								<p class="floor-subtitle" data-i18n="floor3Description">6 скайпниц + 3 переговорки</p>
 								<p class="floor-details" data-i18n="floor3Details">
-									Скайпницы: 7 коинов • Переговорки: 12 коинов
+									Для созвонов и командных встреч
 								</p>
 							</div>
 							<div class="floor-icon">
@@ -441,34 +441,7 @@
 			</button>
 		</div>
 
-		<!-- Модальное окно для ввода пароля админки -->
-		<div id="admin-password-modal" class="admin-password-modal" style="display: none;">
-			<div class="admin-password-modal-content">
-				<div class="admin-password-modal-header">
-					<h3>🔐 Доступ к админ-панели</h3>
-					<button class="admin-password-close" onclick="closeAdminPasswordModal()">
-						<i class="fas fa-times"></i>
-					</button>
-				</div>
-				<div class="admin-password-modal-body">
-					<p class="admin-password-label">Введите пароль:</p>
-					<input 
-						type="password" 
-						id="admin-password-input" 
-						class="admin-password-input"
-						placeholder="Пароль"
-						autocomplete="off"
-					/>
-					<div id="admin-password-error" class="admin-password-error" style="display: none;">
-						❌ Неверный пароль
-					</div>
-					<button class="btn btn-primary" onclick="checkAdminPassword()" style="width: 100%; margin-top: 16px;">
-						<i class="fas fa-key"></i> Войти
-					</button>
-				</div>
-			</div>
-		</div>
-
+		<script src="api.js"></script>
 		<script src="app.js"></script>
 		<script src="booking.js"></script>
 	</body>

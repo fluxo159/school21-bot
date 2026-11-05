@@ -24,9 +24,9 @@ const translations = {
 		floor3: '3 Этаж',
 		floor: 'Этаж',
 		floor2Description: '3 скайпницы',
-		floor2Details: '7 коинов/час • До 4 человек • Шумоизоляция',
+		floor2Details: 'До 4 человек • Шумоизоляция',
 		floor3Description: '6 скайпниц + 3 переговорки',
-		floor3Details: 'Скайпницы: 7 коинов • Переговорки: 12 коинов',
+		floor3Details: 'Для созвонов и командных встреч',
 		
 		// Регистрация
 		welcome: '👋 Добро пожаловать!',
@@ -133,7 +133,7 @@ const translations = {
 		// Дополнительные сообщения
 		enterSchoolLogin: 'Введите школьный логин!',
 		enterPhoneNumber: 'Введите номер телефона!',
-		invalidPhoneFormat: 'Неверный формат телефона. Используйте формат: +998-XX-XXX-XX-XX (например: +998-90-870-50-11)',
+		invalidPhoneFormat: 'Неверный формат телефона. Используйте формат: +998-XX-XXX-XX-XX (например: +998-XX-XXX-XX-XX)',
 		errorPrefix: 'Ошибка: ',
 		networkError: 'Ошибка сети',
 		bookingModuleError: 'Ошибка: модуль бронирования не загружен. Пожалуйста, обновите страницу.',
@@ -221,9 +221,9 @@ const translations = {
 		floor3: '3-qavat',
 		floor: 'qavat',
 		floor2Description: '3 ta skayp xonasi',
-		floor2Details: 'Soatiga 7 tanga • 4 kishigacha • Shovqin izolyatsiyasi',
+		floor2Details: '4 kishigacha • Shovqin izolyatsiyasi',
 		floor3Description: '6 ta skayp xonasi + 3 ta majlis xonasi',
-		floor3Details: 'Skayp xonalari: 7 tanga • Majlis xonalari: 12 tanga',
+		floor3Details: 'Qo‘ng‘iroqlar va jamoaviy uchrashuvlar uchun',
 		
 		// Регистрация
 		welcome: '👋 Xush kelibsiz!',
@@ -330,7 +330,7 @@ const translations = {
 		// Дополнительные сообщения
 		enterSchoolLogin: 'Maktab loginini kiriting!',
 		enterPhoneNumber: 'Telefon raqamini kiriting!',
-		invalidPhoneFormat: 'Noto\'g\'ri telefon formati. Formatdan foydalaning: +998-XX-XXX-XX-XX (masalan: +998-90-870-50-11)',
+		invalidPhoneFormat: 'Noto\'g\'ri telefon formati. Formatdan foydalaning: +998-XX-XXX-XX-XX (masalan: +998-XX-XXX-XX-XX)',
 		errorPrefix: 'Xatolik: ',
 		networkError: 'Tarmoq xatosi',
 		bookingModuleError: 'Xatolik: bron moduli yuklanmadi. Iltimos, sahifani yangilang.',

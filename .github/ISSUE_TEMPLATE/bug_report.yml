@@ -1,0 +1,38 @@
+name: Bug report
+description: Help us reproduce and fix a problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve school21-bot. Use synthetic data and redact logs. Never include bot tokens, Telegram initData, phone numbers or database files. For security issues, read our [security policy](https://github.com/fluxo159/school21-bot/blob/main/SECURITY.md).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the behavior you saw and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the local demo
+        2. Choose a floor
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Python version, operating system, browser or Telegram client, and commit/version.
+      placeholder: Python 3.12, macOS, Telegram Desktop, commit abc1234
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted logs or screenshots
+      description: Optional; remove all credentials and personal information first.

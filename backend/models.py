@@ -1,53 +1,40 @@
-# backend/models.py
+"""Persistence and transaction rules for users, rooms and bookings."""
+
 from datetime import datetime
-from database import get_connection
+from typing import Any, Optional
+
+from .config import campus_now
+from .database import get_connection, get_db_connection
+
 
 class User:
+    """Profiles bound to a verified Telegram user ID."""
+
     @staticmethod
-    def get_or_create(telegram_id, school_login=None, phone=None):
-        """Получить пользователя или создать нового с 100 коинами"""
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        # Проверяем существует ли пользователь
-        cursor.execute("SELECT * FROM users WHERE telegram_id = ?", (telegram_id,))
-        user = cursor.fetchone()
-        
-        if user:
-            # Пользователь существует
-            conn.close()
-            return {
-                'id': user[0],
-                'telegram_id': user[1],
-                'school_login': user[2],
-                'phone': user[3],
-                'coins': user[4],
-                'created_at': user[5],
-                'is_new': False
-            }
-        else:
-            # Создаем нового пользователя с 100 коинами
-            cursor.execute(
-                "INSERT INTO users (telegram_id, school_login, phone, coins) VALUES (?, ?, ?, 1000)",  # Для тестирования установлено 1000 коинов
-                (telegram_id, school_login, phone)
+    def get_or_create(
+        telegram_id: int, school_login: str | None = None, phone: str | None = None
+    ) -> dict[str, Any]:
+        """Return a peer or atomically create one with 1000 booking credits."""
+        with get_db_connection() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            cursor = conn.execute(
+                """INSERT INTO users (telegram_id, school_login, phone, coins, created_at)
+                   VALUES (?, ?, ?, 1000, ?) ON CONFLICT(telegram_id) DO NOTHING""",
+                (telegram_id, school_login, phone, campus_now().isoformat()),
             )
-            conn.commit()
-            user_id = cursor.lastrowid
-            
-            conn.close()
-            return {
-                'id': user_id,
-                'telegram_id': telegram_id,
-                'school_login': school_login,
-                'phone': phone,
-                'coins': 1000,  # Для тестирования установлено 1000 коинов
-                'created_at': datetime.now(),
-                'is_new': True
-            }
-    
+            is_new = cursor.rowcount == 1
+            row = conn.execute(
+                "SELECT id, telegram_id, school_login, phone, coins, created_at FROM users WHERE telegram_id = ?",
+                (telegram_id,),
+            ).fetchone()
+        return dict(
+            zip(("id", "telegram_id", "school_login", "phone", "coins", "created_at"), row),
+            is_new=is_new,
+        )
+
     @staticmethod
-    def get_coins(telegram_id):
-        """Получить количество коинов пользователя"""
+    def get_coins(telegram_id: int) -> int:
+        """Return the peer booking-credit balance."""
         conn = get_connection()
         cursor = conn.cursor()
         try:
@@ -56,492 +43,308 @@ class User:
             return result[0] if result else 0
         finally:
             conn.close()
-    
+
     @staticmethod
-    def update_profile(telegram_id, school_login, phone):
-        """Обновить или создать профиль пользователя"""
-        try:
-            from login_validator import validate_login
-            
-            conn = get_connection()
-            cursor = conn.cursor()
-            
-            # Сначала проверяем существует ли пользователь
-            cursor.execute("SELECT id, school_login FROM users WHERE telegram_id = ?", (telegram_id,))
-            user = cursor.fetchone()
-            
-            # Валидация логина (для новых логинов или при изменении)
-            is_valid, error_msg = validate_login(school_login)
-            if not is_valid:
-                conn.close()
-                return {'success': False, 'error': error_msg}
-            
-            if not user:
-                # Пользователь не существует - создаем нового (регистрация нового пира)
-                # Проверяем уникальность логина (регистронезависимо)
-                cursor.execute("SELECT telegram_id FROM users WHERE LOWER(school_login) = ?", (school_login.lower(),))
-                existing_login = cursor.fetchone()
-                
-                if existing_login:
-                    conn.close()
-                    return {'success': False, 'error': 'Этот школьный логин уже занят другим пользователем'}
-                
-                # Проверяем уникальность телефона
-                cursor.execute("SELECT telegram_id FROM users WHERE phone = ?", (phone,))
-                existing_phone = cursor.fetchone()
-                
-                if existing_phone:
-                    conn.close()
-                    return {'success': False, 'error': 'Этот номер телефона уже используется другим пользователем'}
-                
-                cursor.execute(
-                    "INSERT INTO users (telegram_id, school_login, phone, coins) VALUES (?, ?, ?, 1000)",
-                    (telegram_id, school_login, phone)
-                )
-                conn.commit()
-                conn.close()
-                return {'success': True}
-            
-            # Пользователь существует - обновляем профиль
-            current_login = user[1]  # Текущий логин пользователя
-            
-            # Получаем текущий телефон пользователя
-            cursor.execute("SELECT phone FROM users WHERE telegram_id = ?", (telegram_id,))
-            current_phone_result = cursor.fetchone()
-            current_phone = current_phone_result[0] if current_phone_result and current_phone_result[0] else None
-            
-            # Проверяем уникальность логина (если логин меняется) - регистронезависимая проверка
-            if current_login and current_login.strip() and current_login.lower() != school_login.lower():
-                # Логин меняется - проверяем уникальность нового логина (регистронезависимо)
-                cursor.execute("SELECT telegram_id FROM users WHERE LOWER(school_login) = ? AND telegram_id != ?", 
-                             (school_login.lower(), telegram_id))
-                existing_user = cursor.fetchone()
-                
-                if existing_user:
-                    conn.close()
-                    return {'success': False, 'error': 'Этот школьный логин уже занят другим пользователем'}
-            elif not current_login or not current_login.strip():
-                # Первая регистрация - проверяем уникальность (регистронезависимо)
-                cursor.execute("SELECT telegram_id FROM users WHERE LOWER(school_login) = ? AND telegram_id != ?", 
-                             (school_login.lower(), telegram_id))
-                existing_user = cursor.fetchone()
-                
-                if existing_user:
-                    conn.close()
-                    return {'success': False, 'error': 'Этот школьный логин уже занят другим пользователем'}
-            
-            # Проверяем уникальность телефона (если телефон меняется или устанавливается впервые)
-            current_phone_normalized = current_phone.strip() if current_phone else None
-            new_phone_normalized = phone.strip()
-            
-            if current_phone_normalized != new_phone_normalized:
-                # Телефон меняется или устанавливается - проверяем уникальность нового телефона
-                cursor.execute("SELECT telegram_id FROM users WHERE phone = ? AND telegram_id != ?", 
-                             (phone, telegram_id))
-                existing_phone_user = cursor.fetchone()
-                
-                if existing_phone_user:
-                    conn.close()
-                    return {'success': False, 'error': 'Этот номер телефона уже используется другим пользователем'}
-            
-            # Обновляем логин и телефон (можно изменить в любое время)
-            cursor.execute(
-                "UPDATE users SET school_login = ?, phone = ? WHERE telegram_id = ?",
-                (school_login, phone, telegram_id)
+    def update_profile(telegram_id: int, school_login: str, phone: str) -> dict[str, Any]:
+        """Update the caller's profile while serializing uniqueness checks."""
+        from .login_validator import validate_login
+
+        is_valid, error = validate_login(school_login)
+        if not is_valid:
+            return {"success": False, "error": error}
+        with get_db_connection() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            existing = conn.execute(
+                "SELECT 1 FROM users WHERE LOWER(school_login) = ? AND telegram_id != ?",
+                (school_login.lower(), telegram_id),
+            ).fetchone()
+            if existing:
+                return {"success": False, "error": "School login is already in use."}
+            existing = conn.execute(
+                "SELECT 1 FROM users WHERE phone = ? AND telegram_id != ?",
+                (phone, telegram_id),
+            ).fetchone()
+            if existing:
+                return {"success": False, "error": "Phone number is already in use."}
+            conn.execute(
+                """INSERT INTO users (telegram_id, school_login, phone, coins, created_at)
+                   VALUES (?, ?, ?, 1000, ?)
+                   ON CONFLICT(telegram_id) DO UPDATE
+                   SET school_login = excluded.school_login, phone = excluded.phone""",
+                (telegram_id, school_login, phone, campus_now().isoformat()),
             )
-            
-            conn.commit()
-            affected_rows = cursor.rowcount
-            conn.close()
-            
-            if affected_rows == 0:
-                return {'success': False, 'error': 'Не удалось обновить профиль'}
-                
-            return {'success': True}
-            
-        except Exception as e:
-            raise e
+        return {"success": True}
+
 
 class Room:
+    """Campus room catalog and configured booking prices."""
+
     @staticmethod
-    def get_all():
-        """Получить все активные комнаты"""
+    def get_all() -> list[dict[str, Any]]:
+        """Return all active rooms ordered by floor and price."""
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM rooms WHERE is_active = 1 ORDER BY floor, type, price")
         rooms = cursor.fetchall()
         conn.close()
-        
-        return [{
-            'id': r[0],
-            'name': r[1],
-            'type': r[2],
-            'floor': r[3],  # ДОБАВЛЕНО ПОЛЕ ЭТАЖА
-            'price': r[4],
-            'description': r[5],
-            'photo_url': r[6],
-            'max_persons': r[7]
-        } for r in rooms]
-    
+
+        return [
+            {
+                "id": r[0],
+                "name": r[1],
+                "type": r[2],
+                "floor": r[3],  # ДОБАВЛЕНО ПОЛЕ ЭТАЖА
+                "price": r[4],
+                "description": r[5],
+                "photo_url": r[6],
+                "max_persons": r[7],
+            }
+            for r in rooms
+        ]
+
     @staticmethod
-    def get_by_floor(floor_number):
-        """Получить комнаты по этажу"""
+    def get_by_floor(floor_number: int) -> list[dict[str, Any]]:
+        """Return the active rooms on a floor."""
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM rooms WHERE is_active = 1 AND floor = ? ORDER BY type, price", (floor_number,))
+        cursor.execute(
+            "SELECT * FROM rooms WHERE is_active = 1 AND floor = ? ORDER BY type, price",
+            (floor_number,),
+        )
         rooms = cursor.fetchall()
         conn.close()
-        
-        return [{
-            'id': r[0],
-            'name': r[1],
-            'type': r[2],
-            'floor': r[3],
-            'price': r[4],
-            'description': r[5],
-            'photo_url': r[6],
-            'max_persons': r[7]
-        } for r in rooms]
-    
+
+        return [
+            {
+                "id": r[0],
+                "name": r[1],
+                "type": r[2],
+                "floor": r[3],
+                "price": r[4],
+                "description": r[5],
+                "photo_url": r[6],
+                "max_persons": r[7],
+            }
+            for r in rooms
+        ]
+
     @staticmethod
-    def get_by_id(room_id):
-        """Получить комнату по ID"""
+    def get_by_id(room_id: int) -> Optional[dict[str, Any]]:
+        """Return one room or None if it does not exist."""
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM rooms WHERE id = ?", (room_id,))
         room = cursor.fetchone()
         conn.close()
-        
+
         if room:
             return {
-                'id': room[0],
-                'name': room[1],
-                'type': room[2],
-                'floor': room[3],
-                'price': room[4],
-                'description': room[5],
-                'photo_url': room[6],
-                'max_persons': room[7]
+                "id": room[0],
+                "name": room[1],
+                "type": room[2],
+                "floor": room[3],
+                "price": room[4],
+                "description": room[5],
+                "photo_url": room[6],
+                "max_persons": room[7],
             }
         return None
 
+
 class Booking:
+    """Reservations and atomic internal-credit transactions."""
+
     @staticmethod
-    def create(user_id, room_id, date, start_time, end_time):
-        """Создать бронирование с проверкой на race condition"""
-        from datetime import datetime
-        
-        # Валидация даты - не должна быть в прошлом
-        # Используем локальное время сервера (для Узбекистана UTC+5)
+    def create(
+        user_id: int, room_id: int, date: str, start_time: str, end_time: str
+    ) -> dict[str, Any]:
+        """Reserve a future slot and debit credits in one SQLite write transaction."""
+        from datetime import timedelta
+
+        from .database import get_db_connection
+
         try:
-            booking_date = datetime.strptime(date, '%Y-%m-%d').date()
-            # datetime.now().date() использует локальное время сервера
-            # Убедитесь, что сервер настроен на правильный часовой пояс (UTC+5 для Узбекистана)
-            if booking_date < datetime.now().date():
-                return {'error': 'Нельзя бронировать прошедшие даты'}
+            start = datetime.strptime(f"{date} {start_time}", "%Y-%m-%d %H:%M")
+            end = datetime.strptime(f"{date} {end_time}", "%Y-%m-%d %H:%M")
         except ValueError:
-            return {'error': 'Неверный формат даты'}
-        
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        try:
-            # Начинаем транзакцию для предотвращения race condition
-            cursor.execute("BEGIN IMMEDIATE")
-            
-            # Проверяем достаточно ли коинов
-            cursor.execute("SELECT price FROM rooms WHERE id = ?", (room_id,))
-            room = cursor.fetchone()
-            if not room:
-                return {'error': 'Комната не найдена'}
-            
-            price = room[0]
-            cursor.execute("SELECT coins FROM users WHERE id = ?", (user_id,))
-            user_result = cursor.fetchone()
-            
-            if not user_result:
-                return {'error': 'Пользователь не найден'}
-            
-            user_coins = user_result[0]
-            
-            if user_coins < price:
-                return {'error': 'Недостаточно коинов'}
-            
-            # ИСПРАВЛЕННАЯ логика проверки пересечений с учетом перехода через полночь
-            # Если end_time < start_time, это означает переход через полночь
-            crosses_midnight = end_time < start_time
-            
-            if crosses_midnight:
-                # Проверяем пересечения на текущий день (от start_time до 23:59:59)
-                # и на следующий день (от 00:00:00 до end_time)
-                from datetime import datetime, timedelta
-                next_date = (datetime.strptime(date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
-                
-                # Проверяем пересечения на текущий день (бронирования, которые заканчиваются после start_time)
-                cursor.execute('''
-                    SELECT id FROM bookings 
-                    WHERE room_id = ? AND date = ? AND status = 'confirmed'
-                    AND NOT (end_time <= ? OR start_time >= '23:59:59')
-                ''', (room_id, date, start_time))
-                
-                if cursor.fetchone():
-                    return {'error': 'Это время уже занято'}
-                
-                # Проверяем пересечения на следующий день (бронирования, которые начинаются до end_time)
-                cursor.execute('''
-                    SELECT id FROM bookings 
-                    WHERE room_id = ? AND date = ? AND status = 'confirmed'
-                    AND NOT (end_time <= '00:00:00' OR start_time >= ?)
-                ''', (room_id, next_date, end_time))
-                
-                if cursor.fetchone():
-                    return {'error': 'Это время уже занято'}
-                
-                # Также проверяем бронирования на следующий день, которые переходят через полночь
-                cursor.execute('''
-                    SELECT id FROM bookings 
-                    WHERE room_id = ? AND date = ? AND status = 'confirmed'
-                    AND end_time < start_time
-                    AND NOT (end_time <= '00:00:00' OR start_time >= ?)
-                ''', (room_id, next_date, end_time))
-                
-                if cursor.fetchone():
-                    return {'error': 'Это время уже занято'}
-            else:
-                # Обычная проверка без перехода через полночь
-                cursor.execute('''
-                    SELECT id FROM bookings 
-                    WHERE room_id = ? AND date = ? AND status = 'confirmed'
-                    AND NOT (end_time <= ? OR start_time >= ?)
-                ''', (room_id, date, start_time, end_time))
-                
-                if cursor.fetchone():
-                    return {'error': 'Это время уже занято'}
-                
-                # Также проверяем бронирования на предыдущий день, которые переходят через полночь
-                from datetime import datetime, timedelta
-                prev_date = (datetime.strptime(date, '%Y-%m-%d') - timedelta(days=1)).strftime('%Y-%m-%d')
-                cursor.execute('''
-                    SELECT id FROM bookings 
-                    WHERE room_id = ? AND date = ? AND status = 'confirmed'
-                    AND end_time < start_time
-                    AND NOT (end_time <= ? OR start_time >= '23:59:59')
-                ''', (room_id, prev_date, start_time))
-                
-                if cursor.fetchone():
-                    return {'error': 'Это время уже занято'}
-            
-            if cursor.fetchone():
-                return {'error': 'Это время уже занято'}
-            
-            # Создаем бронирование и списываем коины
-            cursor.execute(
+            return {"error": "Invalid date or time format."}
+        if end < start:
+            end += timedelta(days=1)
+        if start <= campus_now() or not timedelta(hours=1) <= end - start < timedelta(days=1):
+            return {"error": "Choose a future booking between one and 24 hours."}
+        with get_db_connection() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            room = conn.execute(
+                "SELECT price FROM rooms WHERE id = ? AND is_active = 1", (room_id,)
+            ).fetchone()
+            user = conn.execute("SELECT coins FROM users WHERE id = ?", (user_id,)).fetchone()
+            if not room or not user:
+                return {"error": "Room or user not found."}
+            if user[0] < room[0]:
+                return {"error": "Insufficient booking credits."}
+            neighbors = conn.execute(
+                """SELECT date, start_time, end_time FROM bookings
+                   WHERE room_id = ? AND status = 'confirmed' AND date BETWEEN ? AND ?""",
+                (room_id, (start.date() - timedelta(days=1)).isoformat(), end.date().isoformat()),
+            ).fetchall()
+            for existing_date, existing_start, existing_end in neighbors:
+                other_start = datetime.fromisoformat(f"{existing_date}T{existing_start}")
+                other_end = datetime.fromisoformat(f"{existing_date}T{existing_end}")
+                if other_end < other_start:
+                    other_end += timedelta(days=1)
+                if start < other_end and end > other_start:
+                    return {"error": "This slot is already booked."}
+            cursor = conn.execute(
                 "INSERT INTO bookings (user_id, room_id, date, start_time, end_time) VALUES (?, ?, ?, ?, ?)",
-                (user_id, room_id, date, start_time, end_time)
+                (user_id, room_id, date, start_time, end_time),
             )
-            
-            cursor.execute(
-                "UPDATE users SET coins = coins - ? WHERE id = ?",
-                (price, user_id)
-            )
-            
-            conn.commit()
             booking_id = cursor.lastrowid
-            
-            return {'success': True, 'booking_id': booking_id}
-            
-        except Exception as e:
-            conn.rollback()
-            return {'error': f'Ошибка при создании бронирования: {str(e)}'}
-        finally:
-            conn.close()
-    
+            conn.execute("UPDATE users SET coins = coins - ? WHERE id = ?", (room[0], user_id))
+        return {"success": True, "booking_id": booking_id}
+
     @staticmethod
-    def get_user_bookings(telegram_id):
-        """Получить все бронирования пользователя по telegram_id, включая те, что переходят через полночь"""
+    def get_user_bookings(telegram_id: int) -> list[dict[str, Any]]:
+        """Return confirmed bookings, including overnight continuations."""
         from datetime import datetime, timedelta
+
         conn = get_connection()
         cursor = conn.cursor()
-        
+
         # Получаем все бронирования пользователя
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT b.id, r.name, r.type, r.price, b.date, b.start_time, b.end_time, b.status, b.created_at
             FROM bookings b
             JOIN rooms r ON b.room_id = r.id
             JOIN users u ON b.user_id = u.id
             WHERE u.telegram_id = ? AND b.status = 'confirmed'
             ORDER BY b.date DESC, b.start_time DESC
-        ''', (telegram_id,))
-        
+        """,
+            (telegram_id,),
+        )
+
         bookings = cursor.fetchall()
         conn.close()
-        
+
         result = []
         for b in bookings:
             booking_date = b[4]
             start_time = b[5]
             end_time = b[6]
-            
+
             # Проверяем, переходит ли бронирование через полночь
             crosses_midnight = end_time < start_time
-            
-            result.append({
-                'id': b[0],
-                'room_name': b[1],
-                'type': b[2],
-                'price': b[3],
-                'date': booking_date,
-                'start_time': start_time,
-                'end_time': end_time,
-                'status': b[7],
-                'created_at': b[8],
-                'crosses_midnight': crosses_midnight
-            })
-            
+
+            result.append(
+                {
+                    "id": b[0],
+                    "room_name": b[1],
+                    "type": b[2],
+                    "price": b[3],
+                    "date": booking_date,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "status": b[7],
+                    "created_at": b[8],
+                    "crosses_midnight": crosses_midnight,
+                }
+            )
+
             # Если бронирование переходит через полночь, добавляем его также на следующий день
             if crosses_midnight:
-                next_date = (datetime.strptime(booking_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
-                result.append({
-                    'id': b[0],
-                    'room_name': b[1],
-                    'type': b[2],
-                    'price': b[3],
-                    'date': next_date,  # Показываем также на следующий день
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'status': b[7],
-                    'created_at': b[8],
-                    'crosses_midnight': True,
-                    'is_continuation': True  # Флаг, что это продолжение с предыдущего дня
-                })
-        
+                next_date = (
+                    datetime.strptime(booking_date, "%Y-%m-%d") + timedelta(days=1)
+                ).strftime("%Y-%m-%d")
+                result.append(
+                    {
+                        "id": b[0],
+                        "room_name": b[1],
+                        "type": b[2],
+                        "price": b[3],
+                        "date": next_date,  # Показываем также на следующий день
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "status": b[7],
+                        "created_at": b[8],
+                        "crosses_midnight": True,
+                        "is_continuation": True,  # Флаг, что это продолжение с предыдущего дня
+                    }
+                )
+
         # Сортируем по дате и времени
-        result.sort(key=lambda x: (x['date'], x['start_time']), reverse=True)
-        
+        result.sort(key=lambda x: (x["date"], x["start_time"]), reverse=True)
+
         return result
-    
+
     @staticmethod
-    def get_user_bookings_by_id(user_id):
-        """Получить все бронирования пользователя по user_id, включая те, что переходят через полночь"""
+    def get_user_bookings_by_id(user_id: int) -> list[dict[str, Any]]:
+        """Return confirmed bookings for an internal user ID."""
         from datetime import datetime, timedelta
+
         conn = get_connection()
         cursor = conn.cursor()
-        
+
         # Получаем все бронирования пользователя
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT b.id, r.name, r.type, r.price, b.date, b.start_time, b.end_time, b.status, b.created_at
             FROM bookings b
             JOIN rooms r ON b.room_id = r.id
             WHERE b.user_id = ? AND b.status = 'confirmed'
             ORDER BY b.date DESC, b.start_time DESC
-        ''', (user_id,))
-        
+        """,
+            (user_id,),
+        )
+
         bookings = cursor.fetchall()
         conn.close()
-        
+
         result = []
         for b in bookings:
             booking_date = b[4]
             start_time = b[5]
             end_time = b[6]
-            
+
             # Проверяем, переходит ли бронирование через полночь
             crosses_midnight = end_time < start_time
-            
-            result.append({
-                'id': b[0],
-                'room_name': b[1],
-                'type': b[2],
-                'price': b[3],
-                'date': booking_date,
-                'start_time': start_time,
-                'end_time': end_time,
-                'status': b[7],
-                'created_at': b[8],
-                'crosses_midnight': crosses_midnight
-            })
-            
+
+            result.append(
+                {
+                    "id": b[0],
+                    "room_name": b[1],
+                    "type": b[2],
+                    "price": b[3],
+                    "date": booking_date,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "status": b[7],
+                    "created_at": b[8],
+                    "crosses_midnight": crosses_midnight,
+                }
+            )
+
             # Если бронирование переходит через полночь, добавляем его также на следующий день
             if crosses_midnight:
-                next_date = (datetime.strptime(booking_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
-                result.append({
-                    'id': b[0],
-                    'room_name': b[1],
-                    'type': b[2],
-                    'price': b[3],
-                    'date': next_date,
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'status': b[7],
-                    'created_at': b[8],
-                    'crosses_midnight': True,
-                    'is_continuation': True
-                })
-        
+                next_date = (
+                    datetime.strptime(booking_date, "%Y-%m-%d") + timedelta(days=1)
+                ).strftime("%Y-%m-%d")
+                result.append(
+                    {
+                        "id": b[0],
+                        "room_name": b[1],
+                        "type": b[2],
+                        "price": b[3],
+                        "date": next_date,  # Показываем также на следующий день
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "status": b[7],
+                        "created_at": b[8],
+                        "crosses_midnight": True,
+                        "is_continuation": True,  # Флаг, что это продолжение с предыдущего дня
+                    }
+                )
+
         # Сортируем по дате и времени
-        result.sort(key=lambda x: (x['date'], x['start_time']), reverse=True)
-        
-        return result
-    
-    @staticmethod
-    def get_user_bookings_by_id(user_id):
-        """Получить все бронирования пользователя по user_id, включая те, что переходят через полночь"""
-        from datetime import datetime, timedelta
-        conn = get_connection()
-        cursor = conn.cursor()
-        
-        # Получаем все бронирования пользователя
-        cursor.execute('''
-            SELECT b.id, r.name, r.type, r.price, b.date, b.start_time, b.end_time, b.status, b.created_at
-            FROM bookings b
-            JOIN rooms r ON b.room_id = r.id
-            WHERE b.user_id = ? AND b.status = 'confirmed'
-            ORDER BY b.date DESC, b.start_time DESC
-        ''', (user_id,))
-        
-        bookings = cursor.fetchall()
-        conn.close()
-        
-        result = []
-        for b in bookings:
-            booking_date = b[4]
-            start_time = b[5]
-            end_time = b[6]
-            
-            # Проверяем, переходит ли бронирование через полночь
-            crosses_midnight = end_time < start_time
-            
-            result.append({
-                'id': b[0],
-                'room_name': b[1],
-                'type': b[2],
-                'price': b[3],
-                'date': booking_date,
-                'start_time': start_time,
-                'end_time': end_time,
-                'status': b[7],
-                'created_at': b[8],
-                'crosses_midnight': crosses_midnight
-            })
-            
-            # Если бронирование переходит через полночь, добавляем его также на следующий день
-            if crosses_midnight:
-                next_date = (datetime.strptime(booking_date, '%Y-%m-%d') + timedelta(days=1)).strftime('%Y-%m-%d')
-                result.append({
-                    'id': b[0],
-                    'room_name': b[1],
-                    'type': b[2],
-                    'price': b[3],
-                    'date': next_date,  # Показываем также на следующий день
-                    'start_time': start_time,
-                    'end_time': end_time,
-                    'status': b[7],
-                    'created_at': b[8],
-                    'crosses_midnight': True,
-                    'is_continuation': True  # Флаг, что это продолжение с предыдущего дня
-                })
-        
-        # Сортируем по дате и времени
-        result.sort(key=lambda x: (x['date'], x['start_time']), reverse=True)
-        
+        result.sort(key=lambda x: (x["date"], x["start_time"]), reverse=True)
+
         return result

@@ -1,0 +1,29 @@
+name: Feature request
+description: Propose a practical improvement for peers.
+title: "[Feature]: "
+body:
+  - type: textarea
+    id: workflow
+    attributes:
+      label: Which peer workflow needs improvement?
+      description: Explain the problem and who encounters it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe what a student or administrator should be able to do.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and constraints
+      description: Mention alternatives, privacy considerations or required campus permissions. Do not share private data or credentials.
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Interested in contributing?
+      options:
+        - label: I can help discuss, implement or test this feature.
