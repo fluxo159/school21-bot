@@ -1,52 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="400" viewBox="0 0 1280 400" role="img" aria-labelledby="title description">
-  <title id="title">school21-bot — Find a room. Keep your focus.</title>
-  <desc id="description">A dark campus-inspired banner with mint green accents and a geometric room plan.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#101c2d"/><stop offset="1" stop-color="#080e18"/>
-    </linearGradient>
-    <linearGradient id="room" x1="0" y1="0" x2="1" y2="1">
-      <stop stop-color="#244d4c"/><stop offset="1" stop-color="#142b32"/>
-    </linearGradient>
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M32 0H0V32" fill="none" stroke="#7ea6b5" stroke-opacity=".065"/>
-    </pattern>
-  </defs>
-  <rect x="1" y="1" width="1278" height="398" rx="26" fill="url(#bg)" stroke="#263849"/>
-  <rect x="1" y="1" width="1278" height="398" rx="26" fill="url(#grid)"/>
-  <path d="M752 0 634 400" stroke="#91eec9" stroke-opacity=".1"/>
-  <circle cx="66" cy="65" r="5" fill="#91eec9"/>
-  <text x="84" y="71" fill="#91eec9" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="14" letter-spacing="2.4">SCHOOL 21 / COMMUNITY TOOLS</text>
-  <text x="60" y="153" fill="#f0f6fc" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="66" font-weight="750" letter-spacing="-2.8">school21-bot<tspan fill="#91eec9">.</tspan></text>
-  <text x="64" y="211" fill="#c4d3df" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="26" letter-spacing="-.5">Find a room. Keep your focus.</text>
-  <text x="64" y="249" fill="#8198ac" font-family="Inter, system-ui, -apple-system, Segoe UI, sans-serif" font-size="17">Campus room booking, right inside Telegram.</text>
-  <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" letter-spacing="1">
-    <rect x="64" y="301" width="114" height="32" rx="7" fill="#132b2c" stroke="#2c5550"/>
-    <text x="83" y="322" fill="#91eec9">OPEN SOURCE</text>
-    <rect x="190" y="301" width="103" height="32" rx="7" fill="#142332" stroke="#304152"/>
-    <text x="209" y="322" fill="#bdcddc">MINI APP</text>
-    <rect x="305" y="301" width="104" height="32" rx="7" fill="#142332" stroke="#304152"/>
-    <text x="326" y="322" fill="#bdcddc">MIT / 2026</text>
-  </g>
-  <g transform="translate(810 54)">
-    <text x="0" y="16" fill="#6f879c" font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="12" letter-spacing="3">SPACE TO COLLABORATE</text>
-    <rect x="0" y="44" width="380" height="244" rx="15" fill="#0b1420" stroke="#344b5a"/>
-    <rect x="16" y="60" width="167" height="98" rx="9" fill="url(#room)" stroke="#538d80"/>
-    <rect x="197" y="60" width="167" height="98" rx="9" fill="#162431" stroke="#344b5a"/>
-    <rect x="16" y="172" width="348" height="100" rx="9" fill="#162431" stroke="#344b5a"/>
-    <g stroke="#91eec9" stroke-width="2" fill="none">
-      <rect x="42" y="83" width="45" height="38" rx="5"/>
-      <path d="M54 130v-9m21 9v-9M64 83V75"/>
-      <circle cx="320" cy="109" r="16" opacity=".55"/>
-      <path d="M320 100v10l7 5" opacity=".55"/>
-      <rect x="49" y="202" width="79" height="39" rx="18" opacity=".55"/>
-      <path d="M67 195v-7m43 7v-7m-43 67v-7m43 7v-7" opacity=".55"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" role="img" aria-labelledby="title description">
+  <title id="title">S21 Rooms — Room booking, inside Telegram.</title>
+  <desc id="description">A dark and mint cover for the School 21 community room-booking project, with an illustrated floor plan and a room, time, booking flow.</desc>
+  <rect x="1" y="1" width="1278" height="438" rx="22" fill="#0b1111" stroke="#263533"/>
+  <g font-family="Arial, Helvetica, sans-serif">
+    <circle cx="64" cy="56" r="4" fill="#a0e8c5"/>
+    <text x="79" y="61" fill="#9eafaa" font-size="11" letter-spacing="2.4">SCHOOL 21 / COMMUNITY PROJECT</text>
+    <path d="M61 84H1218" stroke="#263533"/>
+    <text x="57" y="175" fill="#f2f7f4" font-size="82" font-weight="700" letter-spacing="-3">S21 Rooms<tspan fill="#a0e8c5">.</tspan></text>
+    <text x="62" y="229" fill="#c0cfc9" font-size="26">Room booking, inside Telegram.</text>
+    <text x="62" y="266" fill="#80968d" font-size="17">Find a space. Pick a time. Keep your focus.</text>
+    <g font-size="12">
+      <rect x="62" y="315" width="148" height="38" rx="8" fill="#12221c" stroke="#2d483b"/>
+      <text x="81" y="339" fill="#a0e8c5">01 / Choose a room</text>
+      <path d="m222 330 5 5-5 5" fill="none" stroke="#597467" stroke-width="1.5"/>
+      <rect x="242" y="315" width="133" height="38" rx="8" fill="#13201c" stroke="#293c33"/>
+      <text x="261" y="339" fill="#b9cbc1">02 / Pick a slot</text>
+      <path d="m388 330 5 5-5 5" fill="none" stroke="#597467" stroke-width="1.5"/>
+      <rect x="409" y="315" width="144" height="38" rx="8" fill="#13201c" stroke="#293c33"/>
+      <text x="428" y="339" fill="#b9cbc1">03 / Reserve it</text>
     </g>
-    <g font-family="ui-monospace, SFMono-Regular, Consolas, monospace" font-size="11" letter-spacing="1">
-      <text x="111" y="98" fill="#9bdbc4">QUIET</text><text x="111" y="117" fill="#9bdbc4">SPACE</text>
-      <text x="218" y="99" fill="#8ca6bc">YOUR</text><text x="218" y="118" fill="#8ca6bc">SCHEDULE</text>
-      <text x="170" y="220" fill="#8ca6bc">ROOM FOR YOUR TEAM</text>
-      <text x="0" y="317" fill="#5d778b">PYTHON</text><text x="99" y="317" fill="#5d778b">TELEGRAM</text><text x="222" y="317" fill="#5d778b">BUILT BY PEERS</text>
+    <text x="63" y="399" fill="#617a6d" font-size="10" letter-spacing="1.4">PYTHON / FLASK / SQLITE / TELEGRAM MINI APP</text>
+    <g transform="translate(782 113)">
+      <rect width="436" height="241" rx="16" fill="#101b17" stroke="#2c4035"/>
+      <text x="22" y="29" fill="#8aa393" font-size="10" letter-spacing="2">A SPACE FOR YOUR NEXT IDEA</text>
+      <rect x="20" y="48" width="144" height="88" rx="9" fill="#1c3527" stroke="#658b70"/>
+      <rect x="178" y="48" width="238" height="88" rx="9" fill="#17261f" stroke="#334e3e"/>
+      <rect x="20" y="150" width="396" height="70" rx="9" fill="#17261f" stroke="#334e3e"/>
+      <g fill="none" stroke="#a0e8c5" stroke-width="1.8">
+        <rect x="45" y="70" width="34" height="28" rx="4"/>
+        <path d="M54 104v-6m16 6v-6M62 70v-7"/>
+        <circle cx="379" cy="91" r="13" stroke="#749c82"/>
+        <path d="M379 83v9l6 4" stroke="#749c82"/>
+        <rect x="43" y="172" width="82" height="27" rx="13" stroke="#749c82"/>
+        <path d="M61 166v-5m45 5v-5m-45 44v5m45-5v5" stroke="#749c82"/>
+      </g>
+      <text x="94" y="84" fill="#b4d4be" font-size="10">QUIET</text>
+      <text x="94" y="102" fill="#b4d4be" font-size="10">SPACE</text>
+      <text x="201" y="86" fill="#99b7a4" font-size="12">Your time,</text>
+      <text x="201" y="105" fill="#99b7a4" font-size="12">planned ahead.</text>
+      <text x="155" y="190" fill="#99b7a4" font-size="13">Room for your team.</text>
     </g>
+    <text x="790" y="397" fill="#617a6d" font-size="10" letter-spacing="1.4">OPEN SOURCE / RU + UZ / MIT</text>
   </g>
 </svg>

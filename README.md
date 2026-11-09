@@ -1,146 +1,115 @@
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="school21-bot — Find a room. Keep your focus." width="100%" />
+  <img src="docs/assets/banner.svg" alt="S21 Rooms — бронирование комнат внутри Telegram" width="100%" />
 </p>
 
-<h1 align="center">school21-bot</h1>
+<p align="center"><strong>Русский</strong> · <a href="README.en.md">English</a></p>
+
+<h1 align="center">S21 Rooms</h1>
 
 <p align="center">
-  <strong>Less room hunting. More time to build.</strong><br />
-  An open-source Telegram bot and Mini App for the School 21 peer community.
+  <strong>Меньше поисков комнаты. Больше времени на работу.</strong><br />
+  Telegram-бот и Mini App для бронирования скайпниц и переговорных School 21.
 </p>
 
 <p align="center">
   <a href="https://github.com/fluxo159/school21-bot/actions/workflows/tests.yml"><img src="https://github.com/fluxo159/school21-bot/actions/workflows/tests.yml/badge.svg?branch=main" alt="Tests" /></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&amp;logoColor=white" alt="Python 3.10+" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-91eec9" alt="MIT License" /></a>
-  <a href="https://github.com/fluxo159/school21-bot/commits/main"><img src="https://img.shields.io/badge/Status-Active-2ea44f" alt="Status: Active" /></a>
-  <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-Welcome-91eec9" alt="PRs Welcome" /></a>
+  <img src="https://img.shields.io/badge/Python-3.10%2B-14231c?style=flat-square&amp;logo=python&amp;logoColor=A0E8C5" alt="Python 3.10+" />
+  <img src="https://img.shields.io/badge/Flask-3.1-14231c?style=flat-square&amp;logo=flask&amp;logoColor=A0E8C5" alt="Flask 3.1" />
+  <img src="https://img.shields.io/badge/Telegram-Mini_App-14231c?style=flat-square&amp;logo=telegram&amp;logoColor=A0E8C5" alt="Telegram Mini App" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-14231c?style=flat-square&amp;logoColor=A0E8C5" alt="MIT License" /></a>
 </p>
 
 <p align="center">
-  <a href="#preview">Preview</a> ·
-  <a href="#features-available-today">Features</a> ·
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#roadmap">Roadmap</a> ·
-  <a href="CONTRIBUTING.md">Contribute</a>
+  <a href="#интерфейс">Интерфейс</a> ·
+  <a href="#возможности">Возможности</a> ·
+  <a href="#быстрый-старт">Быстрый старт</a> ·
+  <a href="docs/deployment.md">Деплой</a> ·
+  <a href="CONTRIBUTING.md">Участие в проекте</a>
 </p>
 
 ---
 
-Find an available Skype booth or meeting room, reserve a slot, and manage your bookings without leaving Telegram. Built for the daily rhythm of peer-to-peer learning at School 21.
+## О проекте
 
-**Independent community project.** Room reservations and internal booking credits are implemented today. Evaluation-point tracking, peer-review schedules and campus notifications are on the [roadmap](#roadmap). This project is not an official School 21 service.
+Найти свободную комнату для звонка, собеседования или совместной работы, выбрать время и управлять бронями — всё в одном интерфейсе внутри Telegram.
 
-## Preview
+**Независимый проект сообщества School 21.** Сейчас реализованы бронирование комнат и внутренние кредиты для бронирований. Учёт официальных баллов, расписание пировых проверок и уведомления кампуса относятся к планам развития. Проект не является официальным сервисом School 21.
+
+## Интерфейс
 
 <table>
   <tr>
-    <th>Choose your space</th>
-    <th>Find an available room</th>
+    <th width="50%">Выберите пространство</th>
+    <th width="50%">Найдите свободную комнату</th>
   </tr>
   <tr>
-    <td width="50%"><img src="docs/assets/preview-floors.jpg" alt="Local demo showing campus floors and the synthetic peerabcd profile" width="100%" /></td>
-    <td width="50%"><img src="docs/assets/preview-rooms.jpg" alt="Local demo showing room availability, capacity and booking-credit prices" width="100%" /></td>
+    <td><img src="docs/assets/preview-floors.jpg" alt="Локальное демо: выбор этажа с тестовым профилем peerabcd" width="100%" /></td>
+    <td><img src="docs/assets/preview-rooms.jpg" alt="Локальное демо: доступные комнаты, вместимость и стоимость бронирования" width="100%" /></td>
   </tr>
 </table>
 
-*Screenshots from the local demo, using a synthetic profile. The Mini App includes Russian and Uzbek interface translations.*
+<p align="center"><sub>Скриншоты локального демо с тестовыми данными. Интерфейс доступен на русском и узбекском языках.</sub></p>
 
-## Why it exists
+## Возможности
 
-During an intense coding bootcamp, finding a quiet room for a call, an interview, or a peer discussion should not require walking between floors or coordinating in several chats. This project brings room availability and personal reservations into one mobile interface inside Telegram.
-
-## Features available today
-
-- `/start` opens the booking Mini App; a Telegram menu button makes it easy to return.
-- Browse Skype booths and meeting rooms on floors 2 and 3, with room photos and capacity.
-- See occupied slots and periodically refreshed room status.
-- Create future reservations, including slots that cross midnight, with transaction-protected conflict checks.
-- View personal bookings and cancel more than one hour before the start, with an atomic credit refund.
-- Register a School 21 login and an Uzbekistan-format phone number.
-- Track **internal booking credits**; these are separate from School 21 evaluation points. New accounts currently receive 1000 credits, and each reservation debits the room's configured price once.
-- Use Russian and Uzbek interface translations.
-- Allowlisted administrators can view recent activity and weekly room-usage reports.
-- Verify Telegram Mini App signatures on the server, with an isolated local browser demo for contributors.
-
-## Roadmap
-
-> **Project vision:** An open-source Telegram automation bot built for the School 21 peer-to-peer developer community to track evaluation points, monitor peer-review schedules, and receive real-time campus notifications.
->
-> These campus integrations are planned; the current release focuses on room booking.
-
-
-- [ ] Evaluation-point tracking through an authorized campus integration.
-- [ ] Peer-review schedules and opt-in reminders.
-- [ ] Opt-in campus announcements and booking notifications.
-- [ ] Campus membership verification beyond self-entered profile fields.
-- [ ] Privacy controls, account deletion and a documented retention policy.
-- [ ] Stronger deployment controls: rate limits, monitoring and broader browser accessibility coverage.
-
-Ideas from peers are welcome in [Issues](https://github.com/fluxo159/school21-bot/issues). Please include a concrete workflow and avoid posting private campus or student data.
-
-## Architecture
-
-```text
-Telegram /start  →  HTTPS Mini App
-                         │ signed Telegram initData
-                         ▼
-                   Flask JSON API  →  SQLite
-                         │
-                   HTML / CSS / JS
-```
-
-| Component | Technology and responsibility |
+| Для участника | Для организации работы |
 | --- | --- |
-| Bot | Python 3.10+, `python-telegram-bot` 22.x; async command and startup handlers, long polling |
-| Web server | Flask; synchronous request handlers served by Gunicorn in deployment |
-| Storage | Standard-library SQLite, WAL mode, write transactions and parameterized SQL |
-| Frontend | Vanilla JavaScript, HTML and CSS, Telegram Web Apps SDK; no Node build required |
-| Configuration | `python-dotenv`; environment variables override the root `.env` file |
-| Tests | Standard-library `unittest`, temporary databases and mocked Telegram calls |
+| Открытие Mini App через `/start` или меню бота. | Скайпницы и переговорные на 2-м и 3-м этажах. |
+| Выбор комнаты, просмотр фото и вместимости. | Проверка пересечений бронирований внутри транзакции. |
+| Свободные и занятые слоты, бронь с переходом через полночь. | Периодическое обновление занятости комнат. |
+| Список своих броней и отмена более чем за час до начала. | Атомарный возврат внутренних кредитов при отмене. |
+| Регистрация логина и телефона, русский и узбекский интерфейс. | Отчёты для администраторов из списка разрешённых Telegram ID. |
 
-```text
-bot.py                    Telegram entry point
-backend/app.py            HTTP routes and authorization
-backend/config.py         Environment and campus timezone
-backend/security.py       Signed Telegram identity validation
-backend/database.py       Schema, migration and example rooms
-backend/models.py         Persistence and booking transactions
-backend/login_validator.py  Peer-login validation
-frontend/                 Mini App, translations and assets
-tests/                    Security and booking regression tests
-docs/deployment.md        Hosting and data-storage notes
-```
+При регистрации начисляются **1000 внутренних кредитов**. Бронирование списывает настроенную стоимость комнаты один раз. Эти кредиты не связаны с официальными баллами School 21.
 
-## Quick start
+## Быстрый старт
 
-Install Python 3.10 or newer. Gunicorn runs on Unix-like systems; the local Flask server also works on Windows.
+Нужен **Python 3.10+**. Для локального демо токен Telegram не требуется.
 
 ```bash
 git clone https://github.com/fluxo159/school21-bot.git
 cd school21-bot
 python3 -m venv venv
 source venv/bin/activate
-# Windows PowerShell: .\venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-### 1. Preview locally, without a Telegram token
+<details>
+<summary>Windows PowerShell</summary>
 
-In `.env`, set `DEMO_MODE=true`, then run:
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+```
+
+Gunicorn используется для размещения на Unix-системах; локальный Flask-сервер работает и на Windows.
+
+</details>
+
+### Попробовать в браузере
+
+В `.env` установите:
+
+```dotenv
+DEMO_MODE=true
+```
+
+Запустите приложение:
 
 ```bash
 python -m backend.app
 ```
 
-Open [http://127.0.0.1:5001](http://127.0.0.1:5001). The schema and 12 example rooms are created automatically. Register a synthetic eight-letter login such as `peerabcd` and use dummy data for the phone field.
+Откройте [127.0.0.1:5001](http://127.0.0.1:5001). Таблицы и 12 примерных комнат создаются автоматически. Для проверки используйте вымышленный логин из восьми букв, например `peerabcd`, и тестовый телефон.
 
-Demo mode accepts loopback requests only, uses a fixed synthetic Telegram identity, disables administrative access, and defaults to `instance/demo.db`. Keep `DATABASE_PATH` unset for this demo so it stays separate from campus data. Do not expose a demo server through a tunnel or deploy it.
+Демо принимает только локальные запросы, использует тестовую Telegram-учётную запись и отключает административный доступ. Не задавайте `DATABASE_PATH` для этого режима: по умолчанию используется отдельная база `instance/demo.db`. **Не публикуйте демо и не открывайте к нему доступ через туннель.**
 
-### 2. Run through Telegram
+### Подключить Telegram
 
-Create a bot with [@BotFather](https://t.me/BotFather), host the Flask application at an HTTPS address, and edit your private `.env`:
+Создайте бота через [@BotFather](https://t.me/BotFather) и укажите в личном `.env`:
 
 ```dotenv
 TELEGRAM_BOT_TOKEN=replace-with-your-bot-token
@@ -149,69 +118,110 @@ DEMO_MODE=false
 ADMIN_TELEGRAM_IDS=
 ```
 
-Set `ADMIN_TELEGRAM_IDS` to a comma-separated list of real administrators' numeric Telegram IDs if admin reporting is needed. The login `admin` and phone numbers do not grant privileges.
-
-Start the web server and, in a second activated terminal, start the bot:
+В двух активированных терминалах запустите веб-приложение и бота:
 
 ```bash
-# Terminal 1: local server; Telegram needs an HTTPS endpoint forwarding to it.
+# Терминал 1
 python -m backend.app
 
-# Terminal 2:
+# Терминал 2
 python bot.py
 ```
 
-Open a private chat with your bot, send `/start`, and tap **Открыть**. `BACKEND_URL` must reach the server over HTTPS; a localhost URL alone cannot be opened by Telegram clients on other devices. For a public deployment, see [deployment instructions](docs/deployment.md).
+`BACKEND_URL` должен вести на доступный по **HTTPS** сервер. Один `localhost` не подходит для Telegram на другом устройстве. Для публичного размещения используйте [инструкцию деплоя](docs/deployment.md), а не локальный Flask-сервер. В личном чате с ботом отправьте `/start` и нажмите «Открыть».
 
-Telegram identity comes from validated `initData`, not a URL parameter or an entered login/phone. Legacy profiles tied to a different Telegram ID need an operator-assisted migration; entering a phone number cannot take over another account.
+## Как устроено
 
-### Configuration
+```text
+Telegram /start
+      │
+      ▼
+Mini App · HTML / CSS / JavaScript
+      │ подписанный initData
+      ▼
+Flask JSON API ── SQLite
+```
 
-All settings and comments are in [`.env.example`](.env.example). Important optional settings:
+| Часть | Технология |
+| --- | --- |
+| Telegram-бот | `python-telegram-bot` 22.x, асинхронные обработчики, long polling. |
+| Сервер | Flask 3.1; для размещения — Gunicorn. |
+| Хранилище | SQLite: WAL, транзакции и параметризованные запросы. |
+| Интерфейс | JavaScript, HTML, CSS и Telegram Web Apps SDK; сборка Node.js не нужна. |
+| Проверки | `unittest`, временные базы и тестовые Telegram-пользователи. |
 
-| Variable | Default | Purpose |
+## Настройка
+
+Все параметры описаны в [`.env.example`](.env.example). Переменные окружения имеют приоритет над `.env`.
+
+| Переменная | По умолчанию | Для чего |
 | --- | --- | --- |
-| `DATABASE_PATH` | `backend/school21.db`, or `instance/demo.db` in demo mode | SQLite file; relative paths resolve from the repository root |
-| `TZ` | `Asia/Tashkent` | Campus wall time for reservations |
-| `PORT` | `5001` locally | HTTP listener port |
-| `INIT_DATA_MAX_AGE` | `86400` | Signed Telegram session lifetime in seconds |
-| `WEB_CONCURRENCY` | `2` | Gunicorn worker count |
-| `FLASK_DEBUG` | `false` | Local development only |
+| `TELEGRAM_BOT_TOKEN` | — | Приватный токен бота. |
+| `BACKEND_URL` | — | HTTPS-адрес веб-приложения. |
+| `DEMO_MODE` | `false` | Изолированное локальное демо. |
+| `ADMIN_TELEGRAM_IDS` | Пусто | Telegram ID администраторов через запятую. |
+| `DATABASE_PATH` | `backend/school21.db` или `instance/demo.db` в демо | Файл базы; относительные пути считаются от корня проекта. |
+| `TZ` | `Asia/Tashkent` | Часовой пояс бронирований. |
+| `PORT` | `5001` | Порт локального сервера. |
+| `INIT_DATA_MAX_AGE` | `86400` | Срок действия подписанной Telegram-сессии, секунды. |
+| `WEB_CONCURRENCY` | `2` | Число процессов Gunicorn. |
+| `FLASK_DEBUG` | `false` | Отладка только при локальной разработке. |
 
-## Development and verification
+## Проверки
 
 ```bash
 python -m unittest discover -s tests -v
 python -m compileall -q backend bot.py
-# Optional, when Node.js is installed:
+```
+
+Дополнительно, если установлен Node.js:
+
+```bash
 node --check frontend/api.js
 node --check frontend/app.js
 node --check frontend/booking.js
+node --check frontend/translations.js
 ```
 
-Tests use temporary databases and synthetic identities. They do not poll Telegram or send messages. CI checks supported Python versions on every push and pull request.
+Тесты используют временные базы и тестовые данные; сообщения в Telegram не отправляются. [GitHub Actions](.github/workflows/tests.yml) выполняет проверки на Python 3.10, 3.12 и 3.13 при push и pull request.
 
-## Security and operational status
+## Структура
 
-The project is actively maintained and has regression tests, but it has not undergone an independent security audit. Before serving a real campus, review the [deployment guide](docs/deployment.md) and [security policy](SECURITY.md), configure HTTPS and persistent storage, and decide what personal data the campus actually needs to collect. Profile fields are self-entered and do not prove School 21 membership.
+```text
+bot.py                   # Команда /start и меню Mini App
+backend/
+├── app.py               # Маршруты API и проверка прав доступа
+├── config.py            # Настройки и часовой пояс
+├── security.py          # Проверка подписанного Telegram initData
+├── database.py          # Схема, миграции и примерные комнаты
+└── models.py            # Бронирования, пользователи и транзакции
+frontend/                # Mini App, переводы и изображения
+tests/                  # Регрессионные проверки
+docs/deployment.md      # Размещение и хранение данных
+```
 
-Never commit `.env`, SQLite files, student exports, logs or bot tokens. Report vulnerabilities privately through GitHub's repository security reporting feature when available; do not publish an exploit or personal data in an issue.
+## Развитие
 
-## Contributing
+- [ ] Учёт официальных баллов через разрешённую интеграцию кампуса.
+- [ ] Расписание пировых проверок и уведомления по подписке.
+- [ ] Проверка принадлежности к кампусу.
+- [ ] Управление личными данными и удалением аккаунта.
+- [ ] Ограничение запросов, мониторинг и расширение проверок доступности.
 
-School 21 peers and outside contributors are welcome. A first contribution can be a clearer translation, a reproducible bug report, a documentation fix or a focused regression test.
+## Документация и участие
 
-- [Report a bug](https://github.com/fluxo159/school21-bot/issues/new?template=bug_report.yml)
-- [Suggest a feature](https://github.com/fluxo159/school21-bot/issues/new?template=feature_request.yml)
-- [Read the contribution guide](CONTRIBUTING.md)
+- [Размещение и эксплуатация](docs/deployment.md) — HTTPS, постоянное хранилище и отдельный процесс бота.
+- [Безопасность](SECURITY.md) — подписанная Telegram-идентификация, права доступа и сообщения об уязвимостях.
+- [Руководство участника](CONTRIBUTING.md) — предложения изменений и проверка перед pull request.
+- [Сообщить об ошибке](https://github.com/fluxo159/school21-bot/issues/new?template=bug_report.yml) · [Предложить функцию](https://github.com/fluxo159/school21-bot/issues/new?template=feature_request.yml).
 
-Fork the repository, make a focused change and open a pull request with verification notes. No contribution is too small to be useful to another peer.
+Идентификация выполняется по проверенному `initData`. Логин `admin`, введённый логин или телефон не дают административных прав и не подтверждают членство в School 21. Проект не проходил независимый аудит безопасности. Не добавляйте в репозиторий `.env`, токены, реальные базы, выгрузки и персональные данные. Для действующего кампуса ознакомьтесь с инструкцией деплоя и политикой безопасности.
 
-## License
+## Лицензия
 
-[MIT License](LICENSE) · Copyright © 2026 Abdujamil Aydarbekov.
+[MIT](LICENSE) · © 2026 Абдужамил Айдарбеков.
 
 <p align="center">
-  Built for peers, with room to grow.<br />
-  <a href="#school21-bot">Back to top ↑</a>
+  Создано для пиров и совместной работы.<br />
+  <a href="#s21-rooms">Наверх ↑</a> · <a href="README.en.md">English documentation</a>
 </p>
