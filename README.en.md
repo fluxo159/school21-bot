@@ -22,7 +22,7 @@
 <p align="center">
   <a href="#preview">Preview</a> ·
   <a href="#features-available-today">Features</a> ·
-  <a href="#quick-start">Quick start</a> ·
+  <a href="#architecture">Architecture</a> ·
   <a href="#roadmap">Roadmap</a> ·
   <a href="CONTRIBUTING.md">Contribute</a>
 </p>
@@ -114,71 +114,6 @@ tests/                    Security and booking regression tests
 docs/deployment.md        Hosting and data-storage notes
 ```
 
-## Quick start
-
-Install Python 3.10 or newer. Gunicorn runs on Unix-like systems; the local Flask server also works on Windows.
-
-```bash
-git clone https://github.com/fluxo159/school21-bot.git
-cd school21-bot
-python3 -m venv venv
-source venv/bin/activate
-# Windows PowerShell: .\venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-cp .env.example .env
-```
-
-### 1. Preview locally, without a Telegram token
-
-In `.env`, set `DEMO_MODE=true`, then run:
-
-```bash
-python -m backend.app
-```
-
-Open [http://127.0.0.1:5001](http://127.0.0.1:5001). The schema and 12 example rooms are created automatically. Register a synthetic eight-letter login such as `peerabcd` and use dummy data for the phone field.
-
-Demo mode accepts loopback requests only, uses a fixed synthetic Telegram identity, disables administrative access, and defaults to `instance/demo.db`. Keep `DATABASE_PATH` unset for this demo so it stays separate from campus data. Do not expose a demo server through a tunnel or deploy it.
-
-### 2. Run through Telegram
-
-Create a bot with [@BotFather](https://t.me/BotFather), host the Flask application at an HTTPS address, and edit your private `.env`:
-
-```dotenv
-TELEGRAM_BOT_TOKEN=replace-with-your-bot-token
-BACKEND_URL=https://your-school21-app.example.com
-DEMO_MODE=false
-ADMIN_TELEGRAM_IDS=
-```
-
-Set `ADMIN_TELEGRAM_IDS` to a comma-separated list of real administrators' numeric Telegram IDs if admin reporting is needed. The login `admin` and phone numbers do not grant privileges.
-
-Start the web server and, in a second activated terminal, start the bot:
-
-```bash
-# Terminal 1: local server; Telegram needs an HTTPS endpoint forwarding to it.
-python -m backend.app
-
-# Terminal 2:
-python bot.py
-```
-
-Open a private chat with your bot, send `/start`, and tap **Открыть**. `BACKEND_URL` must reach the server over HTTPS; a localhost URL alone cannot be opened by Telegram clients on other devices. For a public deployment, see [deployment instructions](docs/deployment.md).
-
-Telegram identity comes from validated `initData`, not a URL parameter or an entered login/phone. Legacy profiles tied to a different Telegram ID need an operator-assisted migration; entering a phone number cannot take over another account.
-
-### Configuration
-
-All settings and comments are in [`.env.example`](.env.example). Important optional settings:
-
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `DATABASE_PATH` | `backend/school21.db`, or `instance/demo.db` in demo mode | SQLite file; relative paths resolve from the repository root |
-| `TZ` | `Asia/Tashkent` | Campus wall time for reservations |
-| `PORT` | `5001` locally | HTTP listener port |
-| `INIT_DATA_MAX_AGE` | `86400` | Signed Telegram session lifetime in seconds |
-| `WEB_CONCURRENCY` | `2` | Gunicorn worker count |
-| `FLASK_DEBUG` | `false` | Local development only |
 
 ## Development and verification
 
@@ -195,7 +130,7 @@ Tests use temporary databases and synthetic identities. They do not poll Telegra
 
 ## Security and operational status
 
-The project is actively maintained and has regression tests, but it has not undergone an independent security audit. Before serving a real campus, review the [deployment guide](docs/deployment.md) and [security policy](SECURITY.md), configure HTTPS and persistent storage, and decide what personal data the campus actually needs to collect. Profile fields are self-entered and do not prove School 21 membership.
+The project is actively maintained and has regression tests, but it has not undergone an independent security audit. Before serving a real campus, review the [security policy](SECURITY.md), configure HTTPS and persistent storage, and decide what personal data the campus actually needs to collect. Profile fields are self-entered and do not prove School 21 membership.
 
 Never commit `.env`, SQLite files, student exports, logs or bot tokens. Report vulnerabilities privately through GitHub's repository security reporting feature when available; do not publish an exploit or personal data in an issue.
 
